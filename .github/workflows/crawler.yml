@@ -5,6 +5,12 @@ on:
     # 我们使用的是 github 官方提供的资源来进行的推送，而每个账号的资源是限额的，为了不被官方判定为滥用而面临封号的风险，不建议比半小时更低
     - cron: "0 8 * * *" # 每天 UTC 08:00 运行一次
   workflow_dispatch:
+    inputs:
+      run_douyin_test:
+        description: "Run one TikHub Douyin test request (may incur a charge; uses available free credit first)"
+        required: false
+        type: boolean
+        default: false
 
 # 添加权限设置
 permissions:
@@ -57,6 +63,22 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_ACTIONS: true
         run: python main.py
+
+      - name: TikHub Douyin single-request test
+        if: ${{ inputs.run_douyin_test == true }}
+        env:
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          DOUYIN_TEST_OUTPUT: /tmp/douyin_test_results.json
+        run: python douyin_video_discovery.py
+
+      - name: Upload Douyin test result
+        if: ${{ always() && inputs.run_douyin_test == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: douyin-test-results
+          path: /tmp/douyin_test_results.json
+          if-no-files-found: warn
+
       - name: Email daily report
         env:
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
