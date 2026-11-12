@@ -16,14 +16,20 @@ on:
         required: false
         type: boolean
         default: false
+      run_douyin_reanalysis:
+        description: "Run DeepSeek scoring on the saved Nov 12 Douyin report only; no TikHub calls"
+        required: false
+        type: boolean
+        default: false
 
 # 添加权限设置
 permissions:
   contents: write
+  actions: read
 
 jobs:
   crawl:
-    if: ${{ inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true }}
+    if: ${{ inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -140,4 +146,43 @@ jobs:
         with:
           name: douyin-full-discovery-report
           path: output/douyin_full_run/
+          if-no-files-found: warn
+
+  douyin_reanalysis:
+    if: ${{ inputs.run_douyin_reanalysis == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download saved Douyin discovery report
+        uses: actions/download-artifact@v4
+        with:
+          name: douyin-full-discovery-report
+          repository: Oscar16121997/TrendRadar
+          run-id: 43331179376
+          github-token: ${{ github.token }}
+          path: input
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install analysis dependency
+        run: python -m pip install requests==2.32.4
+
+      - name: Run DeepSeek analysis on saved videos
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DOUYIN_INPUT_JSON: input/douyin_full_discovery.json
+          DOUYIN_OUTPUT_DIR: output/douyin_ai_analysis
+        run: python douyin_analyze_report.py
+
+      - name: Upload DeepSeek-ranked report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: douyin-deepseek-analysis-report
+          path: output/douyin_ai_analysis/
           if-no-files-found: warn
