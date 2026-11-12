@@ -66,8 +66,8 @@ weight:
 platforms:
   - id: "douyin"
     name: "抖音"
-  - id: "xiaohongshu"
-    name: "小红书" 
+  # - id: "xiaohongshu"
+  #   name: "小红书" 
   # - id: "weibo"
   #   name: "微博"
 
