@@ -1,80 +1,69 @@
 {
-  "generated_at": "2026-11-13T04:46:06.303927+08:00",
-  "total_titles_processed": 339,
+  "generated_at": "2026-11-13T05:38:36.095722+08:00",
+  "total_titles_processed": 413,
   "failed_sources": [],
   "trends": [
     {
-      "keyword_group": "# ========================= # 明星 # ========================= 明星 演员 歌手 艺人 娱乐圈 明星动态 明星恋情 明星八卦 电影 电视剧 综艺 演唱会 明星同框 明星采访 明星穿搭 明星模仿 明星趣事 明星回应 明星争议 明星婚礼 明星家庭 明星造型 明星表演 影视片段 经典角色 影视名场面 幕后花絮 红毯 颁奖典礼 粉丝见面会 明星童年",
-      "match_count": 3,
+      "keyword_group": "时事",
+      "match_count": 6,
       "titles": [
         {
-          "title": "GEN四强幕后花絮",
-          "url": "https://search.bilibili.com/all?keyword=GEN%E5%9B%9B%E5%BC%BA%E5%B9%95%E5%90%8E%E8%8A%B1%E7%B5%AE",
-          "source": "bilibili 热搜",
+          "title": "荷兰法院已驳回捷豹路虎突击调取比亚迪研发资料的申请，还有哪些信息值得关注？这一裁定意味着什么？",
+          "url": "https://www.zhihu.com/question/2104195756106019708",
+          "source": "知乎",
+          "ranks": [
+            1
+          ],
+          "is_new": false,
+          "appearance_count": 4,
+          "time_info": "[04时27分 ~ 05时38分]"
+        },
+        {
+          "title": "“甲醛白菜”案等18起涉食品安全重大犯罪案件被挂牌督办",
+          "url": "https://m.thepaper.cn/newsDetail_forward_34459136",
+          "source": "澎湃新闻",
           "ranks": [
             5
           ],
           "is_new": false,
           "appearance_count": 4,
-          "time_info": "[04时27分 ~ 04时46分]"
+          "time_info": "[04时27分 ~ 05时38分]"
         },
         {
-          "title": "马上评｜明星起诉短剧“偷脸”，AI用脸的边界在哪？",
-          "url": "https://m.thepaper.cn/newsDetail_forward_34459124",
-          "source": "澎湃新闻",
-          "ranks": [
-            7
-          ],
-          "is_new": false,
-          "appearance_count": 3,
-          "time_info": "[04时27分 ~ 04时46分]"
-        },
-        {
-          "title": "这不是电影画面这里是深圳",
-          "url": "https://www.baidu.com/s?wd=%E8%BF%99%E4%B8%8D%E6%98%AF%E7%94%B5%E5%BD%B1%E7%94%BB%E9%9D%A2%E8%BF%99%E9%87%8C%E6%98%AF%E6%B7%B1%E5%9C%B3",
-          "source": "百度热搜",
-          "ranks": [
-            8
-          ],
-          "is_new": false,
-          "appearance_count": 3,
-          "time_info": "[04时27分 ~ 04时46分]"
-        }
-      ]
-    },
-    {
-      "keyword_group": "# ========================= # 网红 # ========================= 网红 博主 网红事件 网络红人 网红争议 网络现象 直播 主播 达人 网红翻车 网络爆红 素人爆红 网络红人 街头采访 网红挑战 热门挑战 网络梗 搞笑视频 爆红视频 百万博主 千万网红 网红同框 网红回应 直播事故 直播名场面 网络名场面 感人瞬间 争议视频 模仿挑战 情侣博主 外国博主 中国博主",
-      "match_count": 2,
-      "titles": [
-        {
-          "title": "海外滑板博主被追杀真相如何",
-          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
+          "title": "如何适应货币战争S2游戏节奏",
+          "url": "https://search.bilibili.com/all?keyword=%E5%A6%82%E4%BD%95%E9%80%82%E5%BA%94%E8%B4%A7%E5%B8%81%E6%88%98%E4%BA%89S2%E6%B8%B8%E6%88%8F%E8%8A%82%E5%A5%8F",
           "source": "bilibili 热搜",
           "ranks": [
-            19
+            11,
+            13
           ],
           "is_new": false,
-          "appearance_count": 4,
-          "time_info": "[04时27分 ~ 04时46分]"
+          "appearance_count": 5,
+          "time_info": "[04时27分 ~ 05时38分]"
         },
         {
-          "title": "天赐抖音直播首秀",
-          "url": "https://www.douyin.com/hot/2743412",
-          "source": "抖音",
+          "title": "财晓得｜“AI恶意使用”为何屡禁不止？34起判决里的治理账",
+          "url": "https://m.thepaper.cn/newsDetail_forward_34395707",
+          "source": "澎湃新闻",
           "ranks": [
-            27,
-            30
+            10
           ],
           "is_new": false,
           "appearance_count": 4,
-          "time_info": "[04时27分 ~ 04时46分]"
-        }
-      ]
-    },
-    {
-      "keyword_group": "# ========================= # 时事 # ========================= 时事 社会新闻 社会事件 突发事件 国际新闻 国际局势 社会热点 争议事件 公共事件 新闻 政策 中国热点 国际冲突 社会争议 文化差异 奇闻 离奇事件 感人故事 暖心故事 真实故事 人物故事 社会现象 生活方式 民生 奇葩事件 罕见现象 历史事件 文化现象 公共安全 网络争议",
-      "match_count": 1,
-      "titles": [
+          "time_info": "[04时27分 ~ 05时38分]"
+        },
+        {
+          "title": "男子失业断供房贷 法院暂不拍卖房产",
+          "url": "https://www.toutiao.com/trending/7707177195038425627/",
+          "source": "今日头条",
+          "ranks": [
+            23,
+            18
+          ],
+          "is_new": false,
+          "appearance_count": 4,
+          "time_info": "[04时27分 ~ 05时38分]"
+        },
         {
           "title": "美国旧金山联储主席戴利（2027年FOMC票委）：对9月加息行动感到安心，但还需继续收紧货币政策。",
           "url": "https://wallstreetcn.com/livenews/3199301",
@@ -85,6 +74,78 @@
           "is_new": false,
           "appearance_count": 1,
           "time_info": "04时28分"
+        }
+      ]
+    },
+    {
+      "keyword_group": "明星",
+      "match_count": 3,
+      "titles": [
+        {
+          "title": "GEN四强幕后花絮",
+          "url": "https://search.bilibili.com/all?keyword=GEN%E5%9B%9B%E5%BC%BA%E5%B9%95%E5%90%8E%E8%8A%B1%E7%B5%AE",
+          "source": "bilibili 热搜",
+          "ranks": [
+            5,
+            7
+          ],
+          "is_new": false,
+          "appearance_count": 5,
+          "time_info": "[04时27分 ~ 05时38分]"
+        },
+        {
+          "title": "马上评｜明星起诉短剧“偷脸”，AI用脸的边界在哪？",
+          "url": "https://m.thepaper.cn/newsDetail_forward_34459124",
+          "source": "澎湃新闻",
+          "ranks": [
+            7
+          ],
+          "is_new": false,
+          "appearance_count": 4,
+          "time_info": "[04时27分 ~ 05时38分]"
+        },
+        {
+          "title": "这不是电影画面这里是深圳",
+          "url": "https://www.baidu.com/s?wd=%E8%BF%99%E4%B8%8D%E6%98%AF%E7%94%B5%E5%BD%B1%E7%94%BB%E9%9D%A2%E8%BF%99%E9%87%8C%E6%98%AF%E6%B7%B1%E5%9C%B3",
+          "source": "百度热搜",
+          "ranks": [
+            8,
+            23
+          ],
+          "is_new": false,
+          "appearance_count": 4,
+          "time_info": "[04时27分 ~ 05时38分]"
+        }
+      ]
+    },
+    {
+      "keyword_group": "网红",
+      "match_count": 2,
+      "titles": [
+        {
+          "title": "海外滑板博主被追杀真相如何",
+          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
+          "source": "bilibili 热搜",
+          "ranks": [
+            19,
+            20
+          ],
+          "is_new": false,
+          "appearance_count": 5,
+          "time_info": "[04时27分 ~ 05时38分]"
+        },
+        {
+          "title": "天赐抖音直播首秀",
+          "url": "https://www.douyin.com/hot/2743412",
+          "source": "抖音",
+          "ranks": [
+            27,
+            30,
+            22
+          ],
+          "is_new": false,
+          "appearance_count": 5,
+          "time_info": "[04时27分 ~ 05时38分]"
         }
       ]
     }
