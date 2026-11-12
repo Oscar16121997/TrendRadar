@@ -1,0 +1,698 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>热点新闻分析</title>
+        <style>
+            * { box-sizing: border-box; }
+            body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                margin: 0; 
+                padding: 16px; 
+                background: #fafafa;
+                color: #333;
+                line-height: 1.5;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            }
+
+            .header {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+                padding: 32px 24px;
+                text-align: center;
+            }
+
+            .header-title {
+                font-size: 22px;
+                font-weight: 700;
+                margin: 0 0 20px 0;
+            }
+
+            .header-info {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                font-size: 14px;
+                opacity: 0.95;
+            }
+
+            .info-item {
+                text-align: center;
+            }
+
+            .info-label {
+                display: block;
+                font-size: 12px;
+                opacity: 0.8;
+                margin-bottom: 4px;
+            }
+
+            .info-value {
+                font-weight: 600;
+                font-size: 16px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .word-group {
+                margin-bottom: 40px;
+            }
+
+            .word-group:first-child {
+                margin-top: 0;
+            }
+
+            .word-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .word-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .word-name {
+                font-size: 17px;
+                font-weight: 600;
+                color: #1a1a1a;
+            }
+
+            .word-count {
+                color: #666;
+                font-size: 13px;
+                font-weight: 500;
+            }
+
+            .word-count.hot { color: #dc2626; font-weight: 600; }
+            .word-count.warm { color: #ea580c; font-weight: 600; }
+
+            .word-index {
+                color: #999;
+                font-size: 12px;
+            }
+
+            .news-item {
+                margin-bottom: 20px;
+                padding: 16px 0;
+                border-bottom: 1px solid #f5f5f5;
+                position: relative;
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .news-item:last-child {
+                border-bottom: none;
+            }
+
+            .news-item.new::after {
+                content: "NEW";
+                position: absolute;
+                top: 12px;
+                right: 0;
+                background: #fbbf24;
+                color: #92400e;
+                font-size: 9px;
+                font-weight: 700;
+                padding: 3px 6px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .news-number {
+                color: #999;
+                font-size: 13px;
+                font-weight: 600;
+                min-width: 20px;
+                text-align: center;
+                flex-shrink: 0;
+                background: #f8f9fa;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                align-self: flex-start;
+                margin-top: 8px;
+            }
+
+            .news-content {
+                flex: 1;
+                min-width: 0;
+                padding-right: 40px;
+            }
+
+            .news-item.new .news-content {
+                padding-right: 50px;
+            }
+
+            .news-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+            }
+
+            .source-name {
+                color: #666;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .category-tag {
+                display: inline-block;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: #eef2ff;
+                color: #4338ca;
+                font-size: 10px;
+                font-weight: 600;
+                line-height: 1.5;
+            }
+
+            .rank-num {
+                color: #fff;
+                background: #6b7280;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 6px;
+                border-radius: 10px;
+                min-width: 18px;
+                text-align: center;
+            }
+
+            .rank-num.top { background: #dc2626; }
+            .rank-num.high { background: #ea580c; }
+
+            .time-info {
+                color: #999;
+                font-size: 11px;
+            }
+
+            .count-info {
+                color: #059669;
+                font-size: 11px;
+                font-weight: 500;
+            }
+
+            .news-title {
+                font-size: 15px;
+                line-height: 1.4;
+                color: #1a1a1a;
+                margin: 0;
+            }
+
+            .news-link {
+                color: #2563eb;
+                text-decoration: none;
+            }
+
+            .news-link:hover {
+                text-decoration: underline;
+            }
+
+            .news-link:visited {
+                color: #7c3aed;
+            }
+
+            .new-section {
+                margin-top: 40px;
+                padding-top: 24px;
+                border-top: 2px solid #f0f0f0;
+            }
+
+            .new-section-title {
+                color: #1a1a1a;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 20px 0;
+            }
+
+            .new-source-group {
+                margin-bottom: 24px;
+            }
+
+            .new-source-title {
+                color: #666;
+                font-size: 13px;
+                font-weight: 500;
+                margin: 0 0 12px 0;
+                padding-bottom: 6px;
+                border-bottom: 1px solid #f5f5f5;
+            }
+
+            .new-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 8px 0;
+                border-bottom: 1px solid #f9f9f9;
+            }
+
+            .new-item:last-child {
+                border-bottom: none;
+            }
+
+            .new-item-number {
+                color: #999;
+                font-size: 12px;
+                font-weight: 600;
+                min-width: 18px;
+                text-align: center;
+                flex-shrink: 0;
+                background: #f8f9fa;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .new-item-rank {
+                color: #fff;
+                background: #6b7280;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 3px 6px;
+                border-radius: 8px;
+                min-width: 20px;
+                text-align: center;
+                flex-shrink: 0;
+            }
+
+            .new-item-rank.top { background: #dc2626; }
+            .new-item-rank.high { background: #ea580c; }
+
+            .new-item-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .new-item-title {
+                font-size: 14px;
+                line-height: 1.4;
+                color: #1a1a1a;
+                margin: 0;
+            }
+
+            .error-section {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 24px;
+            }
+
+            .error-title {
+                color: #dc2626;
+                font-size: 14px;
+                font-weight: 600;
+                margin: 0 0 8px 0;
+            }
+
+            .error-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .error-item {
+                color: #991b1b;
+                font-size: 13px;
+                padding: 2px 0;
+                font-family: 'SF Mono', Consolas, monospace;
+            }
+
+            @media (max-width: 480px) {
+                body { padding: 12px; }
+                .header { padding: 24px 20px; }
+                .content { padding: 20px; }
+                .header-info { grid-template-columns: 1fr; gap: 12px; }
+                .news-header { gap: 6px; }
+                .news-content { padding-right: 45px; }
+                .news-item { gap: 8px; }
+                .new-item { gap: 8px; }
+                .news-number { width: 20px; height: 20px; font-size: 12px; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="header-title">热点新闻分析</div>
+                <div class="header-info">
+                    <div class="info-item">
+                        <span class="info-label">报告类型</span>
+                        <span class="info-value">实时分析</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">新闻总数</span>
+                        <span class="info-value">30 条</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">热点新闻</span>
+                        <span class="info-value">30 条</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">生成时间</span>
+                        <span class="info-value">11-13 06:34</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="word-group">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">全部新闻</div>
+                            <div class="word-count hot">30 条</div>
+                        </div>
+                        <div class="word-index">1/1</div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">摄影美妆</span><span class="rank-num ">29</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2741718" target="_blank" class="news-link">适合五五分的秋冬韩系穿搭</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：60/100</strong><div>英文标题：Autumn K-Fashion for a 50/50 Body Ratio</div><div>推荐理由：五五分身材穿搭实用性强、视觉直观，韩系秋冬穿搭跨文化接受度高，适合短视频展示。</div><div>口播切入：用五五分身材穿搭技巧做秋冬韩系造型改造。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">2</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num top">1</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742749" target="_blank" class="news-link">烟火美食夯吃挑战开赛了</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：58/100</strong><div>英文标题：The Viral Street Food Eating Challenge</div><div>推荐理由：街头美食挑战视觉冲击强、参与门槛低，跨文化观众容易理解，但需要解释“夯吃”这类平台梗。</div><div>口播切入：从抖音美食挑战切入，展示烟火气小吃和挑战玩法。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">3</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="category-tag">网红</span><span class="rank-num ">17</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743396" target="_blank" class="news-link">短剧历史质感完全一个夯字</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：56/100</strong><div>英文标题：This Chinese Short Drama Nails the Historical Look</div><div>推荐理由：短剧历史质感和服化道有强视觉吸引力，也贴合海外对中国古装短剧的好奇，但“夯”字需解释。</div><div>口播切入：从服化道和历史质感切入中国短剧的审美升级。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">4</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">6</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743228" target="_blank" class="news-link">朴树哥哥否认朴树去世</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：52/100</strong><div>英文标题：Pu Shu&#x27;s Brother Denies Singer&#x27;s Death Rumors</div><div>推荐理由：名人去世谣言与家属辟谣有讨论度，涉及谣言传播和公众人物隐私，但朴树海外认知有限。</div><div>口播切入：从谣言传播和名人隐私角度讲一条辟谣新闻。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">5</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">21</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2741776" target="_blank" class="news-link">可以给我买麻辣烫糖葫芦吗</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：47/100</strong><div>英文标题：Can You Buy Me Malatang and Tanghulu?</div><div>推荐理由：麻辣烫和糖葫芦视觉鲜明，撒娇式请求有可爱传播点，跨文化美食好奇心较强。</div><div>口播切入：用可爱请求带出中国街头小吃和情侣互动梗。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">6</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num high">4</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742522" target="_blank" class="news-link">双十一最应该打折的是我的手</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：45/100</strong><div>英文标题：On Singles&#x27; Day, It&#x27;s My Hands That Need a Discount</div><div>推荐理由：双十一“剁手”梗易懂且有共鸣，但视觉素材有限，主要靠口播和消费文化解释。</div><div>口播切入：用剁手梗讲双十一购物狂欢和消费心理。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">7</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="rank-num ">13</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742338" target="_blank" class="news-link">你爱的是花还是花为你开</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：44/100</strong><div>英文标题：Do You Love the Flower, or the Flower Blooming for You?</div><div>推荐理由：花与爱的诗意提问有东方审美和情绪价值，但需要字幕和意境解释才能跨文化传达。</div><div>口播切入：用花与爱的隐喻做一条唯美情绪口播。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">8</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">23</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742767" target="_blank" class="news-link">马天宇的拥抱太戳人了</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：44/100</strong><div>英文标题：Ma Tianyu&#x27;s Hug Is Too Touching</div><div>推荐理由：明星拥抱片段情绪浓度高，粉丝向传播强，但马天宇海外认知度有限。</div><div>口播切入：从明星温柔瞬间讲粉丝为何被一个拥抱戳中。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">9</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">14</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743412" target="_blank" class="news-link">天赐抖音直播首秀</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：43/100</strong><div>英文标题：Tianci&#x27;s Douyin Live Debut</div><div>推荐理由：头部主播直播首秀涉及平台流量和直播生态，有圈层讨论度，但海外需要人物背景。</div><div>口播切入：从主播首秀讲中国直播平台的流量竞争。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">10</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">26</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743240" target="_blank" class="news-link">好像在看赵丽颖朋友圈</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：43/100</strong><div>英文标题：It&#x27;s Like Staring at Zhao Liying&#x27;s Moments Feed</div><div>推荐理由：赵丽颖日常感内容有粉丝吸引力，但海外认知中等，故事性依赖明星本人。</div><div>口播切入：从明星朋友圈既视感讲粉丝对日常感内容的喜爱。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">11</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num high">5</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742996" target="_blank" class="news-link">首个AI漫剧晚会阵容官宣</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：42/100</strong><div>英文标题：First AI Comic-Drama Gala Reveals Lineup</div><div>推荐理由：AI漫剧晚会是新奇娱乐科技话题，但具体阵容和形式对海外观众认知门槛较高。</div><div>口播切入：从AI进入晚会内容生产切入，讨论科技与娱乐的碰撞。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">12</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">7</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2740101" target="_blank" class="news-link">天凉热乎美食登场</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：42/100</strong><div>英文标题：Hot Comfort Food Season Has Arrived</div><div>推荐理由：降温吃热食是跨文化共通的舒适感内容，画面有食欲，但新闻性和故事性较弱。</div><div>口播切入：用天气转凉带出热乎美食的治愈感。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">13</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">22</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2740577" target="_blank" class="news-link">我往这你不炸了吗对口型挑战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：41/100</strong><div>英文标题：The &#x27;Aren&#x27;t You Gonna Blow Up?&#x27; Lip-Sync Challenge</div><div>推荐理由：对口型挑战形式易复制、节奏感强，但中文台词需要翻译才能让海外观众理解笑点。</div><div>口播切入：拆解对口型挑战的表情管理和节奏玩法。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">14</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">28</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742123" target="_blank" class="news-link">马志明正式收郭德纲为义子</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：40/100</strong><div>英文标题：Ma Zhiming Formally Adopts Guo Degang as Godson</div><div>推荐理由：相声界收义子是曲艺圈人物新闻，有传承话题，但郭德纲之外的海外认知有限。</div><div>口播切入：从相声界师承关系讲传统曲艺的人情网络。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">15</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num top">2</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742579" target="_blank" class="news-link">秋冬落地签是一杯warm drink</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：38/100</strong><div>英文标题：A Warm Drink Is Your Autumn Passport</div><div>推荐理由：秋冬热饮仪式感是通用生活方式内容，画面好看但新闻性弱、故事性一般。</div><div>口播切入：用一杯热饮讲秋冬氛围感和生活仪式感。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">16</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">27</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742848" target="_blank" class="news-link">铁公鸡来南太行也得破费</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：38/100</strong><div>英文标题：Even a Penny-Pincher Splurges in the South Taihang Mountains</div><div>推荐理由：南太行风景有视觉优势，旅行消费梗也易懂，但“铁公鸡”俗语需要解释。</div><div>口播切入：用抠门游客也忍不住花钱的梗展示太行山旅行。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">17</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="rank-num ">25</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742482" target="_blank" class="news-link">拔萝卜一开口就是童年那味儿</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：36/100</strong><div>英文标题：&#x27;Pulling the Radish&#x27; Sounds Like Childhood</div><div>推荐理由：中国童年歌曲有怀旧温度，但文化特定性强，海外观众需要旋律和翻译辅助理解。</div><div>口播切入：用中国童年歌曲讲跨代怀旧和简单快乐。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">18</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num ">8</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742609" target="_blank" class="news-link">国内金饰价跌穿1200元</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：34/100</strong><div>英文标题：China&#x27;s Gold Jewelry Prices Fall Below 1,200 Yuan</div><div>推荐理由：金价下跌有消费和婚庆话题延展性，但财经信息偏硬，视觉表达空间有限。</div><div>口播切入：从金价下跌讲消费者观望和婚庆买金需求。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">19</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">15</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743184" target="_blank" class="news-link">告别信开机</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：32/100</strong><div>英文标题：Farewell Letter Starts Filming</div><div>推荐理由：新剧开机属于影视工业信息，海外认知有限，除非有知名演员或强类型卖点。</div><div>口播切入：从新剧开机和演员阵容切入影视动态。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">20</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">18</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2741930" target="_blank" class="news-link">烂奇迹翻唱</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：32/100</strong><div>英文标题：A Cover of &#x27;Bad Miracle&#x27;</div><div>推荐理由：翻唱内容依赖音乐版权和原曲认知，信息量少，海外传播需要更强的声音辨识度。</div><div>口播切入：用翻唱对比和原曲情怀做音乐短视频。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">21</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">11</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2741201" target="_blank" class="news-link">时间从来证明不了什么</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>英文标题：Time Doesn&#x27;t Actually Prove Anything</div><div>推荐理由：反鸡汤情绪文案容易共情，但没有具体事件、人物或视觉抓手，跨文化讲述偏空泛。</div><div>口播切入：用反鸡汤金句引发对时间和关系的情绪共鸣。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">22</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">摄影美妆</span><span class="rank-num ">20</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742043" target="_blank" class="news-link">你还是逃不过覆面系</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>英文标题：You Still Can&#x27;t Escape the Masked Type</div><div>推荐理由：覆面系造型有视觉辨识度，但属于亚文化审美圈层，海外观众需要trope背景说明。</div><div>口播切入：从覆面系造型讲遮脸审美和角色魅力。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">23</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">30</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742831" target="_blank" class="news-link">多喜一家人定档11月16日</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>英文标题：&#x27;Duoxi Family&#x27; Sets November 16 Premiere</div><div>推荐理由：家庭剧定档信息偏常规，海外观众对剧名和演员认知有限，除非有强情节卖点。</div><div>口播切入：从家庭剧定档讲演员阵容和温情卖点。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">24</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">16</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742080" target="_blank" class="news-link">根本没有这样的团战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：28/100</strong><div>英文标题：There&#x27;s No Team Fight Like That</div><div>推荐理由：游戏团战梗高度圈层化，中文表达和语境难翻译，跨文化吸引力有限。</div><div>口播切入：用游戏梗讲团战名场面和玩家共鸣。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">25</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="category-tag">明星</span><span class="rank-num ">24</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743363" target="_blank" class="news-link">一条视频看懂后会友期第五期</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：28/100</strong><div>英文标题：One Video Explains &#x27;After We Meet&#x27; Episode 5</div><div>推荐理由：综艺单期速览服务中文观众，海外受众缺乏节目背景，跨文化讲述成本高。</div><div>口播切入：做综艺剧情速览，适合粉丝向受众。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">26</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num ">12</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2741905" target="_blank" class="news-link">寒潮结束全国大部气温回升</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：24/100</strong><div>英文标题：Cold Snap Ends as Most of China Warms Up</div><div>推荐理由：天气回温信息实用但常规，视觉性和故事性弱，海外受众关注度有限。</div><div>口播切入：从寒潮结束讲天气转折对日常生活的影响。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">27</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num top">3</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743432" target="_blank" class="news-link">亚太之问中国作答</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：22/100</strong><div>英文标题：China Answers the Asia-Pacific Question</div><div>推荐理由：亚太政治议题涉及中国立场，海外受众需要大量背景，轻量短视频难以平衡讲述。</div><div>口播切入：可解释中国在亚太合作中的政策表述，但需避免宣传腔。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">28</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num ">10</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742564" target="_blank" class="news-link">证监会：全力维护市场平稳运行</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：22/100</strong><div>英文标题：China Securities Regulator Vows to Keep Markets Stable</div><div>推荐理由：资本市场维稳是硬财经政策，海外普通受众理解成本高，缺乏画面和人物故事。</div><div>口播切入：从监管信号和市场信心角度做简要财经解释。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">29</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">19</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742560" target="_blank" class="news-link">今天是太阳雨假表哥真表嫂</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：22/100</strong><div>英文标题：Sunshower: Fake Cousin, Real Sister-in-Law</div><div>推荐理由：“假表哥真表嫂”属于中文家庭关系抓马梗，翻译后容易失去笑点，跨文化门槛高。</div><div>口播切入：讲抓马家庭关系梗，但需要额外解释人物关系。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">30</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num ">9</span><span class="time-info">06时33分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2742688" target="_blank" class="news-link">中方驳斥G7涉台联合声明</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：18/100</strong><div>英文标题：China Rejects G7 Statement on Taiwan</div><div>推荐理由：涉台外交表述高度敏感，海外短视频难以在短时间讲清背景，容易引发立场争议。</div><div>口播切入：需谨慎解释各方表述，不适合轻量娱乐化口播。</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    
