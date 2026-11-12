@@ -23,12 +23,11 @@ def _parse_json(text):
     if text.startswith("```"):
         text = text.split("\n", 1)[-1]
         if text.endswith("```"):
-            text = text[:-3]
-    start, end = text.find("["), text.rfind("]")
+            text = text[:-3].strip()
+    start, end = text.find("{"), text.rfind("}")
     if start < 0 or end < start:
-        raise ValueError("DeepSeek response does not contain a JSON array")
+        raise ValueError("DeepSeek response does not contain a JSON object")
     return json.loads(text[start:end + 1])
-
 
 def analyze_news_with_deepseek(news_items: List[Dict]) -> List[Dict]:
     """Annotate every news item; failures leave the original items intact."""
@@ -56,7 +55,7 @@ def analyze_news_with_deepseek(news_items: List[Dict]) -> List[Dict]:
             "评分 score 为 0-100，衡量故事性、视觉性、跨文化吸引力、讨论度和可讲述性。"
             "不要仅因新闻热度高就给高分。英文标题要简洁自然；"
             "angle 用一句话说明英语口播可以从什么角度切入。"
-            "严格返回 JSON 对象，格式为 {\\"items\\":[{\\"id\\":0,\\"categories\\":[],\\"score\\":0,\\"reason\\":\\"...\\",\\"english_title\\":\\"...\\",\\"angle\\":\\"...\\"}]}。"
+            '严格返回 JSON 对象，格式为 {"items":[{"id":0,"categories":[],"score":0,"reason":"...","english_title":"...","angle":"..."}]}。'
             "reason 和 angle 用简体中文，english_title 用英文。\n新闻数据："
             + json.dumps(payload, ensure_ascii=False)
         )
