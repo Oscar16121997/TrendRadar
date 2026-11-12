@@ -57,6 +57,12 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GITHUB_ACTIONS: true
         run: python main.py
+      - name: Email daily report
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: python send_email.py
+
       - name: Commit and push if changes
         run: |
           git config --global user.name 'GitHub Actions'
