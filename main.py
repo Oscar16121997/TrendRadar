@@ -1451,6 +1451,9 @@ def prepare_report_data(
                 "categories": title_data.get("categories", []),
                 "ai_score": title_data.get("ai_score"),
                 "ai_reason": title_data.get("ai_reason", ""),
+                "topic_type": title_data.get("topic_type", ""),
+                "trend_signal": title_data.get("trend_signal", ""),
+                "why_trending": title_data.get("why_trending", ""),
                 "english_title": title_data.get("english_title", ""),
                 "ai_angle": title_data.get("ai_angle", ""),
             }
@@ -2190,6 +2193,9 @@ def render_html_content(
                     html += (
                         f'<div class="ai-analysis">'
                         f'<strong>海外短视频潜力：{int(ai_score)}/100</strong>'
+                        f'<div>热点类型：{html_escape(title_data.get("topic_type", ""))}</div>'
+                        f'<div>热度信号：{html_escape(title_data.get("trend_signal", ""))}</div>'
+                        f'<div>走红原因：{html_escape(title_data.get("why_trending", ""))}</div>'
                         f'<div>英文标题：{html_escape(title_data.get("english_title", ""))}</div>'
                         f'<div>推荐理由：{html_escape(title_data.get("ai_reason", ""))}</div>'
                         f'<div>口播切入：{html_escape(title_data.get("ai_angle", ""))}</div>'
