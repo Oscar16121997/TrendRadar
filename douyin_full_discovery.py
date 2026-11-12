@@ -139,7 +139,11 @@ def get_page_state(payload, business_wrapper):
             search_id = str(obj.get("search_id"))
         if obj.get("backtrace"):
             backtrace = str(obj.get("backtrace"))
-    return cursor, bool(int(has_more)) if str(has_more).isdigit() else bool(has_more), search_id, backtrace
+    if isinstance(has_more, str):
+        has_more_bool = has_more.strip().lower() in ("1", "true", "yes")
+    else:
+        has_more_bool = bool(has_more)
+    return cursor, has_more_bool, search_id, backtrace
 
 
 def request_page(session, api_key, keyword, cursor, search_id, backtrace):
@@ -260,7 +264,7 @@ def main():
         for words in CATEGORY_KEYWORDS.values()
     )
     print(f"开始完整抖音采集：8类，目标每类最多{MAX_PER_CATEGORY}条")
-    print(f"本轮API请求硬上限：{max_total_calls}次；按$0.01/次估算最高约\${max_total_calls * 0.01:.2f}")
+    print(f"本轮API请求硬上限：{max_total_calls}次；按$0.01/次估算最高约${max_total_calls * 0.01:.2f}")
 
     for category, keywords in CATEGORY_KEYWORDS.items():
         print(f"\n== {category} ==")
