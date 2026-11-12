@@ -130,6 +130,7 @@ jobs:
       - name: Run full 8-category Douyin discovery
         env:
           TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DOUYIN_OUTPUT_DIR: output/douyin_full_run
         run: python douyin_full_discovery.py
 
