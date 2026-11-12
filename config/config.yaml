@@ -64,10 +64,10 @@ weight:
 # 增加无聊的小知识
 # 这里的 name 你可以定义任意名称，只具有显示作用，不会影响数据的处理
 platforms:
-
-  - id: "bilibili-hot-search"
-    name: "bilibili 热搜"
-  - id: "weibo"
-    name: "微博"
   - id: "douyin"
     name: "抖音"
+  - id: "xiaohongshu"
+    name: "小红书" 
+  # - id: "weibo"
+  #   name: "微博"
+
