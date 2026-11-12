@@ -35,6 +35,165 @@ CATEGORY_KEYWORDS = {
 }
 
 
+DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
+DEEPSEEK_MODEL = "deepseek-flash"
+AI_BATCH_SIZE = 12
+AI_SCORE_WEIGHTS = {
+    "story_score": 0.25,
+    "visual_potential_score": 0.20,
+    "global_appeal_score": 0.25,
+    "originality_score": 0.15,
+    "discussion_score": 0.15,
+}
+
+
+def _parse_deepseek_json(content):
+    content = (content or "").strip()
+    if content.startswith("```"):
+        content = content.split("\n", 1)[-1]
+        if content.endswith("```"):
+            content = content[:-3].strip()
+    start, end = content.find("{"), content.rfind("}")
+    if start < 0 or end < start:
+        raise ValueError("DeepSeek response does not contain a JSON object")
+    return json.loads(content[start:end + 1])
+
+
+def analyze_douyin_videos_with_deepseek(videos):
+    """Score unique videos once; all claims must be grounded in supplied metadata."""
+    api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    if not api_key:
+        print("⚠️ 未配置 DEEPSEEK_API_KEY，保留原始采集报告，不执行 AI 评分")
+        return {"calls": 0, "analyzed": 0, "failed_batches": 0, "status": "missing_api_key"}
+
+    session = requests.Session()
+    total_calls = 0
+    analyzed = 0
+    failed_batches = 0
+
+    for batch_no, start in enumerate(range(0, len(videos), AI_BATCH_SIZE), 1):
+        batch = videos[start:start + AI_BATCH_SIZE]
+        payload = []
+        for index, video in enumerate(batch):
+            payload.append({
+                "id": index,
+                "video_id": video.get("video_id"),
+                "title_or_caption": video.get("title", ""),
+                "author": video.get("author", ""),
+                "categories": video.get("categories", []),
+                "likes": video.get("likes"),
+                "play_count": video.get("play_count"),
+                "comment_count": video.get("comment_count"),
+                "share_count": video.get("share_count"),
+                "publish_time_utc": video.get("publish_time_utc", ""),
+            })
+
+        system_prompt = (
+            "你是面向美国、英国、加拿大、澳大利亚等英语受众的短视频选题编辑。"
+            "你正在评估中国抖音视频是否适合改编为 TikTok/Instagram 英语内容。"
+            "只能依据输入里的标题/文案、作者、类别、发布时间和互动数字判断。"
+            "你没有观看视频，也没有字幕、画面或评论正文，因此绝对不能声称看到了画面、人物行为或视频情节。"
+            "视觉潜力只能根据标题中明确出现的视觉线索谨慎推断；证据不足时降低该分并降低 confidence。"
+            "点赞数是当前采集时的累计值，不代表最近7天新增点赞速度，也不能单凭点赞数证明正在爆红。"
+            "不要补充外部背景，不要编造人物身份、故事、事件因果、播放量或趋势。"
+            "必须为每条输入生成评分，不得遗漏。"
+            "五项评分均为0到100整数：story_score（故事性/叙事空间）、"
+            "visual_potential_score（视觉表达潜力，仅按文字线索推断）、"
+            "global_appeal_score（英语受众理解和兴趣）、"
+            "originality_score（新鲜感/文化独特性）、"
+            "discussion_score（讨论、共鸣或评论空间）。"
+            "不允许把点赞量直接等同于内容质量；分数衡量的是内容作为海外短视频选题的潜力。"
+            "reason 用简体中文写出基于现有资料的评分依据；"
+            "english_hook 用自然简洁的英文写一个可用于口播开头的钩子；"
+            "content_angle 用简体中文写一句改编方向；"
+            "caveat 用简体中文标注资料不足或改编风险；"
+            "confidence 只能是 high、medium、low。"
+            "严格返回 JSON："
+            "{\"items\":[{\"id\":0,\"story_score\":0,\"visual_potential_score\":0,"
+            "\"global_appeal_score\":0,\"originality_score\":0,\"discussion_score\":0,"
+            "\"reason\":\"\",\"english_hook\":\"\",\"content_angle\":\"\","
+            "\"caveat\":\"\",\"confidence\":\"low\"}]}"
+        )
+        user_prompt = (
+            "请分析以下抖音视频元数据。请特别考虑英语受众是否能快速理解、"
+            "是否有跨文化反差/视觉记忆点/清楚的故事冲突，但没有证据时不要臆测。\n"
+            + json.dumps(payload, ensure_ascii=False)
+        )
+
+        try:
+            response = session.post(
+                DEEPSEEK_API_URL,
+                headers={
+                    "Authorization": "Bearer " + api_key,
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": DEEPSEEK_MODEL,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    "thinking": {"type": "disabled"},
+                    "temperature": 0.2,
+                    "max_tokens": 8192,
+                    "response_format": {"type": "json_object"},
+                },
+                timeout=120,
+            )
+            total_calls += 1
+            response.raise_for_status()
+            content = response.json()["choices"][0]["message"]["content"]
+            parsed = _parse_deepseek_json(content)
+            items = parsed.get("items", []) if isinstance(parsed, dict) else []
+            by_id = {}
+            for result in items:
+                try:
+                    by_id[int(result["id"])] = result
+                except (KeyError, TypeError, ValueError):
+                    continue
+
+            for index, video in enumerate(batch):
+                ai = by_id.get(index)
+                if ai is None:
+                    video["ai_analysis_status"] = "missing_result"
+                    continue
+                scores = {}
+                for field in AI_SCORE_WEIGHTS:
+                    try:
+                        scores[field] = max(0, min(100, int(ai.get(field, 0))))
+                    except (TypeError, ValueError):
+                        scores[field] = 0
+                overall = round(sum(scores[k] * weight for k, weight in AI_SCORE_WEIGHTS.items()))
+                video.update(scores)
+                video["ai_score"] = overall
+                video["ai_reason"] = str(ai.get("reason", ""))[:600]
+                video["english_hook"] = str(ai.get("english_hook", ""))[:300]
+                video["content_angle"] = str(ai.get("content_angle", ""))[:500]
+                video["ai_caveat"] = str(ai.get("caveat", ""))[:400]
+                confidence = str(ai.get("confidence", "low")).lower()
+                video["ai_confidence"] = confidence if confidence in ("high", "medium", "low") else "low"
+                video["ai_analysis_status"] = "completed"
+                video["ai_model"] = DEEPSEEK_MODEL
+                analyzed += 1
+
+            print(f"🤖 DeepSeek 已完成第 {batch_no} 批：{len(batch)} 条输入，成功标注 {sum(1 for v in batch if v.get('ai_analysis_status') == 'completed')} 条")
+        except Exception as exc:
+            failed_batches += 1
+            print(f"⚠️ DeepSeek 第 {batch_no} 批分析失败，保留原始数据：{exc}", file=sys.stderr)
+            for video in batch:
+                video.setdefault("ai_analysis_status", "failed")
+
+    return {
+        "calls": total_calls,
+        "analyzed": analyzed,
+        "failed_batches": failed_batches,
+        "status": "completed" if analyzed == len(videos) else "partial",
+        "model": DEEPSEEK_MODEL,
+        "batch_size": AI_BATCH_SIZE,
+        "score_weights": AI_SCORE_WEIGHTS,
+    }
+
+
 def get_nested_business_data(payload):
     """Locate TikHub's business_data list without assuming wrapper depth."""
     queue = [payload]
