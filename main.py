@@ -15,6 +15,11 @@ import pytz
 import requests
 import yaml
 
+try:
+    from ai_analysis import analyze_news_with_deepseek
+except ImportError:
+    analyze_news_with_deepseek = None
+
 # API 功能为可选依赖，尝试导入 Flask
 try:
     from flask import Flask, jsonify, send_from_directory
@@ -1444,6 +1449,10 @@ def prepare_report_data(
                 "mobile_url": title_data.get("mobileUrl", ""),
                 "is_new": title_data.get("is_new", False),
                 "categories": title_data.get("categories", []),
+                "ai_score": title_data.get("ai_score"),
+                "ai_reason": title_data.get("ai_reason", ""),
+                "english_title": title_data.get("english_title", ""),
+                "ai_angle": title_data.get("ai_angle", ""),
             }
             processed_titles.append(processed_title)
 
@@ -2175,7 +2184,18 @@ def render_html_content(
                     html += escaped_title
 
                 html += """
-                            </div>
+                            </div>"""
+                ai_score = title_data.get("ai_score")
+                if ai_score is not None:
+                    html += (
+                        f'<div class="ai-analysis">'
+                        f'<strong>海外短视频潜力：{int(ai_score)}/100</strong>'
+                        f'<div>英文标题：{html_escape(title_data.get("english_title", ""))}</div>'
+                        f'<div>推荐理由：{html_escape(title_data.get("ai_reason", ""))}</div>'
+                        f'<div>口播切入：{html_escape(title_data.get("ai_angle", ""))}</div>'
+                        f'</div>'
+                    )
+                html += """
                         </div>
                     </div>"""
 
@@ -3293,6 +3313,17 @@ class NewsAnalyzer:
                 word_groups,
                 self.rank_threshold,
             )
+            # AI 分析只作用于完整日报；API 未配置或调用失败时，原始新闻仍完整保留。
+            if analyze_news_with_deepseek and html_stats:
+                all_news = html_stats[0]["titles"] if html_stats else []
+                analyzed_news = analyze_news_with_deepseek(all_news)
+                html_stats[0]["titles"] = analyzed_news
+                # 按 AI 评分排序，高分选题优先展示；未评分新闻仍保留在列表末尾。
+                analyzed_news.sort(
+                    key=lambda item: item.get("ai_score", -1)
+                    if item.get("ai_score") is not None else -1,
+                    reverse=True,
+                )
             # 完整新闻列表已包含当日全部标题，不再重复显示“本次新增热点”区域。
             html_new_titles = None
 
