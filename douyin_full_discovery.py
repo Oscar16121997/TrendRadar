@@ -558,6 +558,7 @@ def main():
             ),
             reverse=True,
         )
+        ai_sorted = ai_sorted[:MAX_PER_CATEGORY]
         ai_ranks = {v["video_id"]: rank for rank, v in enumerate(ai_sorted, 1)}
         for video in ai_sorted:
             row = dict(video)
