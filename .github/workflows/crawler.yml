@@ -179,6 +179,13 @@ jobs:
           DOUYIN_OUTPUT_DIR: output/douyin_ai_analysis
         run: python douyin_analyze_report.py
 
+      - name: Email DeepSeek Douyin report
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DOUYIN_OUTPUT_DIR: output/douyin_ai_analysis
+        run: python send_douyin_report_email.py
+
       - name: Upload DeepSeek-ranked report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
