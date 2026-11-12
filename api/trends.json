@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-13T05:51:23.392882+08:00",
-  "total_titles_processed": 422,
+  "generated_at": "2026-11-13T06:20:03.613940+08:00",
+  "total_titles_processed": 451,
   "failed_sources": [],
   "trends": [
     {
       "keyword_group": "时事",
-      "match_count": 6,
+      "match_count": 7,
       "titles": [
         {
           "title": "荷兰法院已驳回捷豹路虎突击调取比亚迪研发资料的申请，还有哪些信息值得关注？这一裁定意味着什么？",
@@ -15,19 +15,20 @@
             1
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 06时20分]"
         },
         {
           "title": "“甲醛白菜”案等18起涉食品安全重大犯罪案件被挂牌督办",
           "url": "https://m.thepaper.cn/newsDetail_forward_34459136",
           "source": "澎湃新闻",
           "ranks": [
-            5
+            5,
+            6
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 06时20分]"
         },
         {
           "title": "如何适应货币战争S2游戏节奏",
@@ -36,22 +37,24 @@
           "ranks": [
             11,
             13,
-            17
+            17,
+            18
           ],
           "is_new": false,
-          "appearance_count": 7,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 8,
+          "time_info": "[04时27分 ~ 06时20分]"
         },
         {
           "title": "财晓得｜“AI恶意使用”为何屡禁不止？34起判决里的治理账",
           "url": "https://m.thepaper.cn/newsDetail_forward_34395707",
           "source": "澎湃新闻",
           "ranks": [
-            10
+            10,
+            11
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 06时20分]"
         },
         {
           "title": "男子失业断供房贷 法院暂不拍卖房产",
@@ -60,11 +63,23 @@
           "ranks": [
             23,
             18,
-            15
+            15,
+            17
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 06时20分]"
+        },
+        {
+          "title": "特朗普女婿库什纳：与乌克兰总统泽连斯基进行了良好讨论。 俄罗斯总统普京愿意让欧洲在谈判桌上占有一席之地。 人们希望看到这场战争结束。 我们正与欧洲密切合作，但无法断定能在谈判桌上与欧洲达成协议。 过去三天进行了非常密集的会谈。 与俄罗斯总统普京举行了详细且富有成效的会晤。 已与俄罗斯总统普京和乌克兰总统泽连斯基敲定战俘交换事宜。",
+          "url": "https://wallstreetcn.com/livenews/3199375",
+          "source": "华尔街见闻-快讯",
+          "ranks": [
+            2
+          ],
+          "is_new": true,
+          "appearance_count": 1,
+          "time_info": "06时20分"
         },
         {
           "title": "美国旧金山联储主席戴利（2027年FOMC票委）：对9月加息行动感到安心，但还需继续收紧货币政策。",
@@ -81,7 +96,7 @@
     },
     {
       "keyword_group": "明星",
-      "match_count": 3,
+      "match_count": 4,
       "titles": [
         {
           "title": "GEN四强幕后花絮",
@@ -92,19 +107,20 @@
             7
           ],
           "is_new": false,
-          "appearance_count": 7,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 8,
+          "time_info": "[04时27分 ~ 06时20分]"
         },
         {
           "title": "马上评｜明星起诉短剧“偷脸”，AI用脸的边界在哪？",
           "url": "https://m.thepaper.cn/newsDetail_forward_34459124",
           "source": "澎湃新闻",
           "ranks": [
-            7
+            7,
+            8
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 06时20分]"
         },
         {
           "title": "这不是电影画面这里是深圳",
@@ -113,11 +129,23 @@
           "ranks": [
             8,
             23,
-            19
+            19,
+            20
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 06时20分]"
+        },
+        {
+          "title": "红楼梦AI短剧侵害17位演员肖像权",
+          "url": "https://www.baidu.com/s?wd=%E7%BA%A2%E6%A5%BC%E6%A2%A6AI%E7%9F%AD%E5%89%A7%E4%BE%B5%E5%AE%B317%E4%BD%8D%E6%BC%94%E5%91%98%E8%82%96%E5%83%8F%E6%9D%83",
+          "source": "百度热搜",
+          "ranks": [
+            23
+          ],
+          "is_new": true,
+          "appearance_count": 1,
+          "time_info": "06时20分"
         }
       ]
     },
@@ -125,19 +153,6 @@
       "keyword_group": "网红",
       "match_count": 2,
       "titles": [
-        {
-          "title": "海外滑板博主被追杀真相如何",
-          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
-          "source": "bilibili 热搜",
-          "ranks": [
-            19,
-            20,
-            14
-          ],
-          "is_new": false,
-          "appearance_count": 7,
-          "time_info": "[04时27分 ~ 05时51分]"
-        },
         {
           "title": "天赐抖音直播首秀",
           "url": "https://www.douyin.com/hot/2743412",
@@ -149,8 +164,22 @@
             14
           ],
           "is_new": false,
-          "appearance_count": 7,
-          "time_info": "[04时27分 ~ 05时51分]"
+          "appearance_count": 9,
+          "time_info": "[04时27分 ~ 06时20分]"
+        },
+        {
+          "title": "海外滑板博主被追杀真相如何",
+          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
+          "source": "bilibili 热搜",
+          "ranks": [
+            19,
+            20,
+            14,
+            17
+          ],
+          "is_new": false,
+          "appearance_count": 8,
+          "time_info": "[04时27分 ~ 06时20分]"
         }
       ]
     },
@@ -163,11 +192,12 @@
           "url": "https://www.douyin.com/hot/2741718",
           "source": "抖音",
           "ranks": [
-            24
+            24,
+            29
           ],
           "is_new": false,
-          "appearance_count": 2,
-          "time_info": "[05时44分 ~ 05时51分]"
+          "appearance_count": 4,
+          "time_info": "[05时44分 ~ 06时20分]"
         }
       ]
     }
