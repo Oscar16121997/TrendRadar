@@ -357,16 +357,20 @@ def write_reports(videos, summary):
             "max_per_category": MAX_PER_CATEGORY,
             "max_pages_per_keyword": MAX_PAGES_PER_KEYWORD,
             "important_limit": "Keyword-based search, not a full-site crawl. Rankings are top results for the listed search terms, not guaranteed global Douyin category rankings.",
-            "ai_analysis": "Not run in this collection test.",
+            "ai_analysis": "DeepSeek metadata-only editorial scoring. The model does not watch videos; story and visual claims are inferred only from supplied metadata.",
         },
         "videos": videos,
     }
     json_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
     columns = [
-        "category", "likes", "title", "author", "publish_time_utc",
+        "category", "category_rank_by_likes", "ai_rank", "ai_score",
+        "story_score", "visual_potential_score", "global_appeal_score",
+        "originality_score", "discussion_score", "ai_confidence",
+        "ai_analysis_status", "likes", "title", "author", "publish_time_utc",
         "video_url", "video_id", "search_keyword", "play_count",
-        "comment_count", "share_count", "captured_at_utc",
+        "comment_count", "share_count", "ai_reason", "english_hook",
+        "content_angle", "ai_caveat", "captured_at_utc",
     ]
     with csv_path.open("w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=columns, extrasaction="ignore")
@@ -376,19 +380,34 @@ def write_reports(videos, summary):
     rows = []
     for category in CATEGORY_KEYWORDS:
         cat_videos = [v for v in videos if v["category"] == category]
+        cat_videos.sort(
+            key=lambda v: (
+                v.get("ai_score") if v.get("ai_score") is not None else -1,
+                v.get("likes") if v.get("likes") is not None else -1,
+            ),
+            reverse=True,
+        )
         rows.append(f"<h2>{html.escape(category)} ({len(cat_videos)}/{MAX_PER_CATEGORY})</h2>")
-        rows.append("<table><thead><tr><th>点赞</th><th>标题 / 作者</th><th>发布时间 UTC</th><th>视频</th></tr></thead><tbody>")
+        rows.append("<table><thead><tr><th>AI评分</th><th>点赞</th><th>标题 / 作者</th><th>AI判断与选题方向</th><th>英文开场</th><th>发布时间 UTC</th><th>视频</th></tr></thead><tbody>")
         for video in cat_videos:
             title = html.escape(video.get("title") or "(无标题)")
             author = html.escape(video.get("author") or "(未知作者)")
             published = html.escape(video.get("publish_time_utc") or "未知")
             likes = video.get("likes")
             likes_text = f"{likes:,}" if isinstance(likes, int) else "未知"
+            ai_score = video.get("ai_score")
+            ai_text = str(ai_score) if isinstance(ai_score, int) else "未评分"
+            reason = html.escape(video.get("ai_reason") or video.get("ai_caveat") or "暂无分析")
+            angle = html.escape(video.get("content_angle") or "")
+            hook = html.escape(video.get("english_hook") or "")
+            confidence = html.escape(video.get("ai_confidence") or "未评估")
             link = html.escape(video.get("video_url") or "", quote=True)
             link_cell = f'<a href="{link}" target="_blank" rel="noopener">打开抖音视频</a>' if link else "无链接"
             rows.append(
-                f"<tr><td>{likes_text}</td><td>{title}<br><small>{author}</small></td>"
-                f"<td>{published}</td><td>{link_cell}</td></tr>"
+                f"<tr><td>{ai_text}<br><small>{confidence}</small></td>"
+                f"<td>{likes_text}</td><td>{title}<br><small>{author}</small></td>"
+                f"<td>{reason}<br><b>选题方向：</b>{angle}</td>"
+                f"<td>{hook}</td><td>{published}</td><td>{link_cell}</td></tr>"
             )
         rows.append("</tbody></table>")
     html_doc = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
@@ -398,7 +417,7 @@ h1{margin-bottom:6px}small{color:#666}table{border-collapse:collapse;width:100%;
 th,td{border:1px solid #ddd;padding:8px;text-align:left;vertical-align:top}
 th{background:#f3f5f7}td:first-child{white-space:nowrap}
 </style><body><h1>抖音最近7天高赞视频发现报告</h1>
-<p>按点赞排序；发布时间由接口筛选并进行本地7天校验。数据来自关键词搜索，不代表全站绝对排名。</p>
+<p>按 DeepSeek 海外选题潜力评分排序，同时保留抖音当前累计点赞数。AI 只分析标题/描述与互动元数据，并没有观看视频；视觉潜力和故事性均为文字线索推断，需人工复核。</p>
 """ + "\n".join(rows) + "</body></html>"
     html_path.write_text(html_doc, encoding="utf-8")
     return [str(json_path), str(csv_path), str(html_path)]
@@ -515,8 +534,40 @@ def main():
         "category_video_rows": len(final_videos),
         "categories": category_summary,
         "errors": category_errors,
-        "deepseek_analysis": "not run; this stage validates collection and source fields",
+        "deepseek_analysis": "pending",
     }
+
+    # Analyze each unique video once, then propagate the annotations to category rows.
+    unique_videos = list(by_id.values())
+    ai_summary = analyze_douyin_videos_with_deepseek(unique_videos)
+    by_id = {video["video_id"]: video for video in unique_videos}
+
+    final_videos = []
+    for category in CATEGORY_KEYWORDS:
+        cat_videos = [v for v in by_id.values() if category in v.get("categories", [])]
+        cat_videos.sort(
+            key=lambda v: v.get("likes") if v.get("likes") is not None else -1,
+            reverse=True,
+        )
+        like_ranks = {v["video_id"]: rank for rank, v in enumerate(cat_videos, 1)}
+        ai_sorted = sorted(
+            cat_videos,
+            key=lambda v: (
+                v.get("ai_score") if v.get("ai_score") is not None else -1,
+                v.get("likes") if v.get("likes") is not None else -1,
+            ),
+            reverse=True,
+        )
+        ai_ranks = {v["video_id"]: rank for rank, v in enumerate(ai_sorted, 1)}
+        for video in ai_sorted:
+            row = dict(video)
+            row["category"] = category
+            row["category_rank_by_likes"] = like_ranks.get(video["video_id"])
+            row["ai_rank"] = ai_ranks.get(video["video_id"])
+            final_videos.append(row)
+
+    summary["deepseek_analysis"] = ai_summary
+    summary["ai_ranked_category_rows"] = len(final_videos)
     paths = write_reports(final_videos, summary)
     print("\n采集完成")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
