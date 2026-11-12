@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       run_douyin_test:
-        description: "Run one TikHub Douyin test request (may incur a charge; uses available free credit first)"
+        description: "Run exactly one TikHub Douyin API request; confirm free credit and endpoint price before running"
         required: false
         type: boolean
         default: false
