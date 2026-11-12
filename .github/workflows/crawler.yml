@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: false
+      run_douyin_full_discovery:
+        description: "Run one full 8-category Douyin discovery (up to 32 requests; estimated API cost up to $0.32)"
+        required: false
+        type: boolean
+        default: false
 
 # 添加权限设置
 permissions:
@@ -18,7 +23,7 @@ permissions:
 
 jobs:
   crawl:
-    if: ${{ inputs.run_douyin_test != true }}
+    if: ${{ inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -105,4 +110,33 @@ jobs:
         with:
           name: douyin-test-results
           path: /tmp/douyin_test_results.json
+          if-no-files-found: warn
+
+  douyin_full_discovery:
+    if: ${{ inputs.run_douyin_full_discovery == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install collection dependency
+        run: python -m pip install requests==2.32.4
+
+      - name: Run full 8-category Douyin discovery
+        env:
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          DOUYIN_OUTPUT_DIR: output/douyin_full_run
+        run: python douyin_full_discovery.py
+
+      - name: Upload full Douyin discovery report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: douyin-full-discovery-report
+          path: output/douyin_full_run/
           if-no-files-found: warn
