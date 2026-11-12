@@ -56,7 +56,7 @@ def analyze_news_with_deepseek(news_items: List[Dict]) -> List[Dict]:
             "评分 score 为 0-100，衡量故事性、视觉性、跨文化吸引力、讨论度和可讲述性。"
             "不要仅因新闻热度高就给高分。英文标题要简洁自然；"
             "angle 用一句话说明英语口播可以从什么角度切入。"
-            "严格返回 JSON 数组，每项字段为 id,categories,score,reason,english_title,angle。"
+            "严格返回 JSON 对象，格式为 {\\"items\\":[{\\"id\\":0,\\"categories\\":[],\\"score\\":0,\\"reason\\":\\"...\\",\\"english_title\\":\\"...\\",\\"angle\\":\\"...\\"}]}。"
             "reason 和 angle 用简体中文，english_title 用英文。\n新闻数据："
             + json.dumps(payload, ensure_ascii=False)
         )
@@ -74,6 +74,8 @@ def analyze_news_with_deepseek(news_items: List[Dict]) -> List[Dict]:
             response.raise_for_status()
             content = response.json()["choices"][0]["message"]["content"]
             parsed = _parse_json(content)
+            if isinstance(parsed, dict):
+                parsed = parsed.get("items", [])
             by_id = {int(x["id"]): x for x in parsed if "id" in x}
             for i, item in enumerate(batch):
                 ai = by_id.get(i)
