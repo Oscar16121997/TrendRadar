@@ -8,7 +8,7 @@ from typing import Dict, List
 import requests
 
 API_URL = "https://api.deepseek.com/chat/completions"
-MODEL = "deepseek-chat"
+MODEL = "deepseek-flash"
 BATCH_SIZE = 30
 CATEGORIES = ["时事", "网红", "明星", "东方美学", "摄影美妆"]
 
