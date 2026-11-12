@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-13T05:44:48.977502+08:00",
-  "total_titles_processed": 415,
+  "generated_at": "2026-11-13T05:51:23.392882+08:00",
+  "total_titles_processed": 422,
   "failed_sources": [],
   "trends": [
     {
@@ -15,8 +15,8 @@
             1
           ],
           "is_new": false,
-          "appearance_count": 5,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 6,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "“甲醛白菜”案等18起涉食品安全重大犯罪案件被挂牌督办",
@@ -26,8 +26,8 @@
             5
           ],
           "is_new": false,
-          "appearance_count": 5,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 6,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "如何适应货币战争S2游戏节奏",
@@ -35,11 +35,12 @@
           "source": "bilibili 热搜",
           "ranks": [
             11,
-            13
+            13,
+            17
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "财晓得｜“AI恶意使用”为何屡禁不止？34起判决里的治理账",
@@ -49,8 +50,8 @@
             10
           ],
           "is_new": false,
-          "appearance_count": 5,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 6,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "男子失业断供房贷 法院暂不拍卖房产",
@@ -58,11 +59,12 @@
           "source": "今日头条",
           "ranks": [
             23,
-            18
+            18,
+            15
           ],
           "is_new": false,
-          "appearance_count": 5,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 6,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "美国旧金山联储主席戴利（2027年FOMC票委）：对9月加息行动感到安心，但还需继续收紧货币政策。",
@@ -90,8 +92,8 @@
             7
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "马上评｜明星起诉短剧“偷脸”，AI用脸的边界在哪？",
@@ -101,8 +103,8 @@
             7
           ],
           "is_new": false,
-          "appearance_count": 5,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 6,
+          "time_info": "[04时27分 ~ 05时51分]"
         },
         {
           "title": "这不是电影画面这里是深圳",
@@ -110,11 +112,12 @@
           "source": "百度热搜",
           "ranks": [
             8,
-            23
+            23,
+            19
           ],
           "is_new": false,
-          "appearance_count": 5,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 6,
+          "time_info": "[04时27分 ~ 05时51分]"
         }
       ]
     },
@@ -122,6 +125,19 @@
       "keyword_group": "网红",
       "match_count": 2,
       "titles": [
+        {
+          "title": "海外滑板博主被追杀真相如何",
+          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
+          "source": "bilibili 热搜",
+          "ranks": [
+            19,
+            20,
+            14
+          ],
+          "is_new": false,
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 05时51分]"
+        },
         {
           "title": "天赐抖音直播首秀",
           "url": "https://www.douyin.com/hot/2743412",
@@ -133,20 +149,8 @@
             14
           ],
           "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时44分]"
-        },
-        {
-          "title": "海外滑板博主被追杀真相如何",
-          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
-          "source": "bilibili 热搜",
-          "ranks": [
-            19,
-            20
-          ],
-          "is_new": false,
-          "appearance_count": 6,
-          "time_info": "[04时27分 ~ 05时44分]"
+          "appearance_count": 7,
+          "time_info": "[04时27分 ~ 05时51分]"
         }
       ]
     },
@@ -161,9 +165,9 @@
           "ranks": [
             24
           ],
-          "is_new": true,
-          "appearance_count": 1,
-          "time_info": "05时44分"
+          "is_new": false,
+          "appearance_count": 2,
+          "time_info": "[05时44分 ~ 05时51分]"
         }
       ]
     }
