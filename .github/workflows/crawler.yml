@@ -222,7 +222,7 @@ jobs:
 
       - name: Run marketing account trend detector
         env:
-          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_MARKETING_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           MARKETING_OUTPUT_DIR: output/marketing_trend
         run: python marketing_trend.py
