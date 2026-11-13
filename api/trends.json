@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-13T06:52:08.437612+08:00",
-  "total_titles_processed": 482,
+  "generated_at": "2026-11-14T00:01:40.062282+08:00",
+  "total_titles_processed": 310,
   "failed_sources": [],
   "trends": [
     {
@@ -8,195 +8,165 @@
       "match_count": 7,
       "titles": [
         {
-          "title": "荷兰法院已驳回捷豹路虎突击调取比亚迪研发资料的申请，还有哪些信息值得关注？这一裁定意味着什么？",
-          "url": "https://www.zhihu.com/question/2104195756106019708",
-          "source": "知乎",
-          "ranks": [
-            1
-          ],
-          "is_new": false,
-          "appearance_count": 10,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "“甲醛白菜”案等18起涉食品安全重大犯罪案件被挂牌督办",
-          "url": "https://m.thepaper.cn/newsDetail_forward_34459136",
-          "source": "澎湃新闻",
-          "ranks": [
-            5,
-            6
-          ],
-          "is_new": false,
-          "appearance_count": 10,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "财晓得｜“AI恶意使用”为何屡禁不止？34起判决里的治理账",
-          "url": "https://m.thepaper.cn/newsDetail_forward_34395707",
-          "source": "澎湃新闻",
-          "ranks": [
-            10,
-            11
-          ],
-          "is_new": false,
-          "appearance_count": 10,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "如何适应货币战争S2游戏节奏",
-          "url": "https://search.bilibili.com/all?keyword=%E5%A6%82%E4%BD%95%E9%80%82%E5%BA%94%E8%B4%A7%E5%B8%81%E6%88%98%E4%BA%89S2%E6%B8%B8%E6%88%8F%E8%8A%82%E5%A5%8F",
-          "source": "bilibili 热搜",
-          "ranks": [
-            11,
-            13,
-            17,
-            18,
-            12
-          ],
-          "is_new": false,
-          "appearance_count": 11,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "男子失业断供房贷 法院暂不拍卖房产",
-          "url": "https://www.toutiao.com/trending/7707177195038425627/",
-          "source": "今日头条",
-          "ranks": [
-            23,
-            18,
-            15,
-            17,
-            13
-          ],
-          "is_new": false,
-          "appearance_count": 10,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "特朗普女婿库什纳：与乌克兰总统泽连斯基进行了良好讨论。 俄罗斯总统普京愿意让欧洲在谈判桌上占有一席之地。 人们希望看到这场战争结束。 我们正与欧洲密切合作，但无法断定能在谈判桌上与欧洲达成协议。 过去三天进行了非常密集的会谈。 与俄罗斯总统普京举行了详细且富有成效的会晤。 已与俄罗斯总统普京和乌克兰总统泽连斯基敲定战俘交换事宜。",
-          "url": "https://wallstreetcn.com/livenews/3199375",
+          "title": "机构：油价已基本消化战争溢价，即便达成协议，布伦特仍有望维持90美元以上",
+          "url": "https://wallstreetcn.com/livenews/3199888",
           "source": "华尔街见闻-快讯",
           "ranks": [
-            2,
-            14
-          ],
-          "is_new": false,
-          "appearance_count": 4,
-          "time_info": "[06时20分 ~ 06时52分]"
-        },
-        {
-          "title": "美国旧金山联储主席戴利（2027年FOMC票委）：对9月加息行动感到安心，但还需继续收紧货币政策。",
-          "url": "https://wallstreetcn.com/livenews/3199301",
-          "source": "华尔街见闻-快讯",
-          "ranks": [
-            25
+            9
           ],
           "is_new": false,
           "appearance_count": 1,
-          "time_info": "04时28分"
+          "time_info": "00时01分"
+        },
+        {
+          "title": "重庆通报「帮连吃 7 碗米饭母女放钱」视频系摆拍已立案，这类虚假摆拍该承担哪些法律责任？",
+          "url": "https://www.zhihu.com/question/2104310469767054805",
+          "source": "知乎",
+          "ranks": [
+            9
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        },
+        {
+          "title": "国家卫健委：我国严禁任何形式代孕，组织代孕属于违法犯罪行为",
+          "url": "https://m.thepaper.cn/newsDetail_forward_34467284",
+          "source": "澎湃新闻",
+          "ranks": [
+            14
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        },
+        {
+          "title": "美联储柯林斯：谨慎调整政策是合适的。",
+          "url": "https://flash.jin10.com/detail/20261113234037765800",
+          "source": "金十数据",
+          "ranks": [
+            14
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        },
+        {
+          "title": "美国国会议员要求总统特朗普的商务部官员Kessler和英伟达法律总顾问到国会山出席听证会。",
+          "url": "https://wallstreetcn.com/livenews/3199880",
+          "source": "华尔街见闻-快讯",
+          "ranks": [
+            17
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        },
+        {
+          "title": "美联储柯林斯：我认为很快就有必要进一步收紧政策。",
+          "url": "https://flash.jin10.com/detail/20261113233832175800",
+          "source": "金十数据",
+          "ranks": [
+            19
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        },
+        {
+          "title": "美联储柯林斯：货币政策的正确方向是明确的。",
+          "url": "https://flash.jin10.com/detail/20261113233757698800",
+          "source": "金十数据",
+          "ranks": [
+            20
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
         }
       ]
     },
     {
       "keyword_group": "明星",
-      "match_count": 4,
+      "match_count": 3,
       "titles": [
         {
-          "title": "GEN四强幕后花絮",
-          "url": "https://search.bilibili.com/all?keyword=GEN%E5%9B%9B%E5%BC%BA%E5%B9%95%E5%90%8E%E8%8A%B1%E7%B5%AE",
-          "source": "bilibili 热搜",
+          "title": "王晶回应麻将女王票房",
+          "url": "https://s.weibo.com/weibo?q=%23%E7%8E%8B%E6%99%B6%E5%9B%9E%E5%BA%94%E9%BA%BB%E5%B0%86%E5%A5%B3%E7%8E%8B%E7%A5%A8%E6%88%BF%23&t=31&band_rank=5&Refer=top",
+          "source": "微博",
           "ranks": [
-            5,
-            7
+            5
           ],
           "is_new": false,
-          "appearance_count": 11,
-          "time_info": "[04时27分 ~ 06时52分]"
+          "appearance_count": 1,
+          "time_info": "00时01分"
         },
         {
-          "title": "马上评｜明星起诉短剧“偷脸”，AI用脸的边界在哪？",
-          "url": "https://m.thepaper.cn/newsDetail_forward_34459124",
-          "source": "澎湃新闻",
-          "ranks": [
-            7,
-            8
-          ],
-          "is_new": false,
-          "appearance_count": 10,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "这不是电影画面这里是深圳",
-          "url": "https://www.baidu.com/s?wd=%E8%BF%99%E4%B8%8D%E6%98%AF%E7%94%B5%E5%BD%B1%E7%94%BB%E9%9D%A2%E8%BF%99%E9%87%8C%E6%98%AF%E6%B7%B1%E5%9C%B3",
+          "title": "汪明荃演唱会听歌吃席两不误",
+          "url": "https://www.baidu.com/s?wd=%E6%B1%AA%E6%98%8E%E8%8D%83%E6%BC%94%E5%94%B1%E4%BC%9A%E5%90%AC%E6%AD%8C%E5%90%83%E5%B8%AD%E4%B8%A4%E4%B8%8D%E8%AF%AF",
           "source": "百度热搜",
           "ranks": [
-            8,
-            23,
-            19,
-            20,
-            15
+            10
           ],
           "is_new": false,
-          "appearance_count": 10,
-          "time_info": "[04时27分 ~ 06时52分]"
+          "appearance_count": 1,
+          "time_info": "00时01分"
         },
         {
-          "title": "红楼梦AI短剧侵害17位演员肖像权",
-          "url": "https://www.baidu.com/s?wd=%E7%BA%A2%E6%A5%BC%E6%A2%A6AI%E7%9F%AD%E5%89%A7%E4%BE%B5%E5%AE%B317%E4%BD%8D%E6%BC%94%E5%91%98%E8%82%96%E5%83%8F%E6%9D%83",
-          "source": "百度热搜",
+          "title": "导演白雪认为如果停止思考和阅读，只依靠大脑存量内容和 AI 对话，长期一定会出问题，你碰过类似情况吗？",
+          "url": "https://www.zhihu.com/question/2102865309602242713",
+          "source": "知乎",
           "ranks": [
-            23,
-            20
+            12
           ],
           "is_new": false,
-          "appearance_count": 4,
-          "time_info": "[06时20分 ~ 06时52分]"
+          "appearance_count": 1,
+          "time_info": "00时01分"
         }
       ]
     },
     {
       "keyword_group": "网红",
-      "match_count": 3,
+      "match_count": 2,
       "titles": [
         {
-          "title": "天赐抖音直播首秀",
-          "url": "https://www.douyin.com/hot/2743412",
+          "title": "大衣哥称不直播带货：把控不了产品",
+          "url": "https://www.baidu.com/s?wd=%E5%A4%A7%E8%A1%A3%E5%93%A5%E7%A7%B0%E4%B8%8D%E7%9B%B4%E6%92%AD%E5%B8%A6%E8%B4%A7%EF%BC%9A%E6%8A%8A%E6%8E%A7%E4%B8%8D%E4%BA%86%E4%BA%A7%E5%93%81",
+          "source": "百度热搜",
+          "ranks": [
+            9
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        },
+        {
+          "title": "大舞台把人间烟火气摆进直播间",
+          "url": "https://www.douyin.com/hot/2744879",
           "source": "抖音",
-          "ranks": [
-            27,
-            30,
-            22,
-            14,
-            13
-          ],
-          "is_new": false,
-          "appearance_count": 14,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "海外滑板博主被追杀真相如何",
-          "url": "https://search.bilibili.com/all?keyword=%E6%B5%B7%E5%A4%96%E6%BB%91%E6%9D%BF%E5%8D%9A%E4%B8%BB%E8%A2%AB%E8%BF%BD%E6%9D%80%E7%9C%9F%E7%9B%B8%E5%A6%82%E4%BD%95",
-          "source": "bilibili 热搜",
-          "ranks": [
-            19,
-            20,
-            14,
-            17
-          ],
-          "is_new": false,
-          "appearance_count": 11,
-          "time_info": "[04时27分 ~ 06时52分]"
-        },
-        {
-          "title": "网红「疯狂小马哥」离世，家人称是「打 PK」被要求喝 20 瓶酒中途猝死，连麦者与平台应承担责任吗？",
-          "url": "https://www.zhihu.com/question/2103943866126525715",
-          "source": "知乎",
           "ranks": [
             15
           ],
           "is_new": false,
-          "appearance_count": 2,
-          "time_info": "[06时35分 ~ 06时52分]"
+          "appearance_count": 1,
+          "time_info": "00时01分"
+        }
+      ]
+    },
+    {
+      "keyword_group": "东方美学",
+      "match_count": 1,
+      "titles": [
+        {
+          "title": "UP主手搓非遗竹编盛笼",
+          "url": "https://search.bilibili.com/all?keyword=UP%E4%B8%BB%E6%89%8B%E6%90%93%E9%9D%9E%E9%81%97%E7%AB%B9%E7%BC%96%E7%9B%9B%E7%AC%BC",
+          "source": "bilibili 热搜",
+          "ranks": [
+            8
+          ],
+          "is_new": false,
+          "appearance_count": 1,
+          "time_info": "00时01分"
         }
       ]
     },
@@ -205,17 +175,15 @@
       "match_count": 1,
       "titles": [
         {
-          "title": "适合五五分的秋冬韩系穿搭",
-          "url": "https://www.douyin.com/hot/2741718",
+          "title": "覆面系转场挑战",
+          "url": "https://www.douyin.com/hot/2744008",
           "source": "抖音",
           "ranks": [
-            24,
-            29,
-            25
+            17
           ],
           "is_new": false,
-          "appearance_count": 9,
-          "time_info": "[05时44分 ~ 06时52分]"
+          "appearance_count": 1,
+          "time_info": "00时01分"
         }
       ]
     }

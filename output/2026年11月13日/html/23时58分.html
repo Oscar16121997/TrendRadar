@@ -1,0 +1,698 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>热点新闻分析</title>
+        <style>
+            * { box-sizing: border-box; }
+            body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+                margin: 0; 
+                padding: 16px; 
+                background: #fafafa;
+                color: #333;
+                line-height: 1.5;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+            }
+
+            .header {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: white;
+                padding: 32px 24px;
+                text-align: center;
+            }
+
+            .header-title {
+                font-size: 22px;
+                font-weight: 700;
+                margin: 0 0 20px 0;
+            }
+
+            .header-info {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                font-size: 14px;
+                opacity: 0.95;
+            }
+
+            .info-item {
+                text-align: center;
+            }
+
+            .info-label {
+                display: block;
+                font-size: 12px;
+                opacity: 0.8;
+                margin-bottom: 4px;
+            }
+
+            .info-value {
+                font-weight: 600;
+                font-size: 16px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            .word-group {
+                margin-bottom: 40px;
+            }
+
+            .word-group:first-child {
+                margin-top: 0;
+            }
+
+            .word-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .word-info {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .word-name {
+                font-size: 17px;
+                font-weight: 600;
+                color: #1a1a1a;
+            }
+
+            .word-count {
+                color: #666;
+                font-size: 13px;
+                font-weight: 500;
+            }
+
+            .word-count.hot { color: #dc2626; font-weight: 600; }
+            .word-count.warm { color: #ea580c; font-weight: 600; }
+
+            .word-index {
+                color: #999;
+                font-size: 12px;
+            }
+
+            .news-item {
+                margin-bottom: 20px;
+                padding: 16px 0;
+                border-bottom: 1px solid #f5f5f5;
+                position: relative;
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .news-item:last-child {
+                border-bottom: none;
+            }
+
+            .news-item.new::after {
+                content: "NEW";
+                position: absolute;
+                top: 12px;
+                right: 0;
+                background: #fbbf24;
+                color: #92400e;
+                font-size: 9px;
+                font-weight: 700;
+                padding: 3px 6px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .news-number {
+                color: #999;
+                font-size: 13px;
+                font-weight: 600;
+                min-width: 20px;
+                text-align: center;
+                flex-shrink: 0;
+                background: #f8f9fa;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                align-self: flex-start;
+                margin-top: 8px;
+            }
+
+            .news-content {
+                flex: 1;
+                min-width: 0;
+                padding-right: 40px;
+            }
+
+            .news-item.new .news-content {
+                padding-right: 50px;
+            }
+
+            .news-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+                flex-wrap: wrap;
+            }
+
+            .source-name {
+                color: #666;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .category-tag {
+                display: inline-block;
+                padding: 2px 7px;
+                border-radius: 999px;
+                background: #eef2ff;
+                color: #4338ca;
+                font-size: 10px;
+                font-weight: 600;
+                line-height: 1.5;
+            }
+
+            .rank-num {
+                color: #fff;
+                background: #6b7280;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 6px;
+                border-radius: 10px;
+                min-width: 18px;
+                text-align: center;
+            }
+
+            .rank-num.top { background: #dc2626; }
+            .rank-num.high { background: #ea580c; }
+
+            .time-info {
+                color: #999;
+                font-size: 11px;
+            }
+
+            .count-info {
+                color: #059669;
+                font-size: 11px;
+                font-weight: 500;
+            }
+
+            .news-title {
+                font-size: 15px;
+                line-height: 1.4;
+                color: #1a1a1a;
+                margin: 0;
+            }
+
+            .news-link {
+                color: #2563eb;
+                text-decoration: none;
+            }
+
+            .news-link:hover {
+                text-decoration: underline;
+            }
+
+            .news-link:visited {
+                color: #7c3aed;
+            }
+
+            .new-section {
+                margin-top: 40px;
+                padding-top: 24px;
+                border-top: 2px solid #f0f0f0;
+            }
+
+            .new-section-title {
+                color: #1a1a1a;
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 20px 0;
+            }
+
+            .new-source-group {
+                margin-bottom: 24px;
+            }
+
+            .new-source-title {
+                color: #666;
+                font-size: 13px;
+                font-weight: 500;
+                margin: 0 0 12px 0;
+                padding-bottom: 6px;
+                border-bottom: 1px solid #f5f5f5;
+            }
+
+            .new-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 8px 0;
+                border-bottom: 1px solid #f9f9f9;
+            }
+
+            .new-item:last-child {
+                border-bottom: none;
+            }
+
+            .new-item-number {
+                color: #999;
+                font-size: 12px;
+                font-weight: 600;
+                min-width: 18px;
+                text-align: center;
+                flex-shrink: 0;
+                background: #f8f9fa;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .new-item-rank {
+                color: #fff;
+                background: #6b7280;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 3px 6px;
+                border-radius: 8px;
+                min-width: 20px;
+                text-align: center;
+                flex-shrink: 0;
+            }
+
+            .new-item-rank.top { background: #dc2626; }
+            .new-item-rank.high { background: #ea580c; }
+
+            .new-item-content {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .new-item-title {
+                font-size: 14px;
+                line-height: 1.4;
+                color: #1a1a1a;
+                margin: 0;
+            }
+
+            .error-section {
+                background: #fef2f2;
+                border: 1px solid #fecaca;
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 24px;
+            }
+
+            .error-title {
+                color: #dc2626;
+                font-size: 14px;
+                font-weight: 600;
+                margin: 0 0 8px 0;
+            }
+
+            .error-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .error-item {
+                color: #991b1b;
+                font-size: 13px;
+                padding: 2px 0;
+                font-family: 'SF Mono', Consolas, monospace;
+            }
+
+            @media (max-width: 480px) {
+                body { padding: 12px; }
+                .header { padding: 24px 20px; }
+                .content { padding: 20px; }
+                .header-info { grid-template-columns: 1fr; gap: 12px; }
+                .news-header { gap: 6px; }
+                .news-content { padding-right: 45px; }
+                .news-item { gap: 8px; }
+                .new-item { gap: 8px; }
+                .news-number { width: 20px; height: 20px; font-size: 12px; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="header-title">热点新闻分析</div>
+                <div class="header-info">
+                    <div class="info-item">
+                        <span class="info-label">报告类型</span>
+                        <span class="info-value">实时分析</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">新闻总数</span>
+                        <span class="info-value">30 条</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">热点新闻</span>
+                        <span class="info-value">30 条</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">生成时间</span>
+                        <span class="info-value">11-13 23:58</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="word-group">
+                    <div class="word-header">
+                        <div class="word-info">
+                            <div class="word-name">全部新闻</div>
+                            <div class="word-count hot">30 条</div>
+                        </div>
+                        <div class="word-index">1/1</div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">1</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时尚潮流</span><span class="category-tag">摄影美妆</span><span class="rank-num ">17</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744008" target="_blank" class="news-link">覆面系转场挑战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：72/100</strong><div>热点类型：时尚风格走红</div><div>热度信号：抖音单平台第17位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：覆面转场依靠强视觉反差和变装效果，容易模仿和二创。</div><div>英文标题：The Masked Transition Challenge</div><div>推荐理由：视觉冲击强、参与门槛低，适合跨语言传播，是典型可模仿的审美挑战。</div><div>口播切入：从遮脸到变装的转场反差切入，拆解这种视觉挑战为何易模仿。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">2</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="rank-num top">2</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743514" target="_blank" class="news-link">课本里的逍遥游有画面了</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：68/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第2位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：把抽象古文转成可见画面，容易激发中文课本记忆和对东方意象的讨论。</div><div>英文标题：A Classic Chinese Text Comes to Life</div><div>推荐理由：古典文本视觉化有辨识度，画面感和文化差异都适合短视频讲述。</div><div>口播切入：从课本里的古文变成画面切入，解释《逍遥游》的意象为何适合视觉化。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">3</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">22</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745226" target="_blank" class="news-link">当你被选中和吴彦祖一起嗦粉</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：66/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第22位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：明星、随机路人、地方小吃的组合有反差和亲近感。</div><div>英文标题：When You’re Chosen to Eat Noodles with Daniel Wu</div><div>推荐理由：名人反差和街头美食结合，故事轻巧、画面自然，跨文化理解门槛较低。</div><div>口播切入：从被选中和吴彦祖一起嗦粉切入，讲明星与普通人偶遇的反差感。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">4</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="rank-num top">1</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743716" target="_blank" class="news-link">手工敲虾到底有多好吃</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：62/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第1位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：手工敲打虾肉的过程有强视觉和声音细节，地方食物做法对海外观众有新鲜感。</div><div>英文标题：Hand-Beaten Shrimp: How Good Can It Be?</div><div>推荐理由：食物制作过程视觉性强、跨文化理解门槛低，但缺少人物故事和持续趋势信号。</div><div>口播切入：从手工捶打虾肉的传统技法切入，展示食物质感与地方饮食文化。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">5</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">18</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743959" target="_blank" class="news-link">停车楼飘移帅炸了</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：58/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第18位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：停车楼飘移有危险感和视觉冲击，但缺少人物故事和安全语境。</div><div>英文标题：Insane Parking Garage Drift</div><div>推荐理由：画面刺激、适合短视频，但需注意安全表述，且叙事深度有限。</div><div>口播切入：从停车楼飘移的视觉冲击切入，提醒这是高风险特技而非日常驾驶。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">6</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时尚潮流</span><span class="rank-num ">26</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745123" target="_blank" class="news-link">烂奇迹手势舞挑战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：58/100</strong><div>热点类型：时尚风格走红</div><div>热度信号：抖音单平台第26位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：手势舞挑战视觉门槛低、易模仿，适合跨语言传播。</div><div>英文标题：The ‘Bad Miracle’ Hand Dance Challenge</div><div>推荐理由：动作型挑战不依赖语言，适合短视频模仿，但需要强节奏和记忆点。</div><div>口播切入：从简单易学的手势舞切入，拆解它为何适合跨语言模仿。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">7</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">21</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745342" target="_blank" class="news-link">TXT新专主打初舞台公开</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：55/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第21位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：K-pop新专初舞台自带粉丝基本盘，视觉舞台适合短视频。</div><div>英文标题：TXT Unveils First Stage for New Title Track</div><div>推荐理由：有全球粉丝基础和舞台视觉，但依赖组合认知，非粉丝吸引力中等。</div><div>口播切入：从新专主打初舞台切入，聚焦编舞、造型和粉丝反应。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">8</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="rank-num ">30</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743809" target="_blank" class="news-link">这口猪刨花拌面吃商极高</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：55/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第30位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：地方拌面做法有食物视觉和猎奇点，适合美食短视频。</div><div>英文标题：This Shaved Pork Noodle Dish Is Next-Level</div><div>推荐理由：食物画面有吸引力，口味和做法有新鲜感，但故事性依赖具体人物或店铺背景。</div><div>口播切入：从猪刨花拌面的做法和口感切入，展示地方小吃的视觉与猎奇感。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">9</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">摄影美妆</span><span class="category-tag">社会现象</span><span class="rank-num ">28</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744247" target="_blank" class="news-link">我的脸不接受锐评谢谢</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：52/100</strong><div>热点类型：社会现象</div><div>热度信号：抖音单平台第28位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：拒绝外貌锐评的表达有情绪共鸣，可连接审美评论文化。</div><div>英文标题：My Face Doesn’t Accept Harsh Reviews</div><div>推荐理由：话题涉及外貌评价和边界感，容易引发讨论，但需避免变成容貌焦虑炒作。</div><div>口播切入：从拒绝外貌锐评切入，聊网络审美评论的边界和年轻人的态度。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">10</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">社会现象</span><span class="rank-num ">15</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744879" target="_blank" class="news-link">大舞台把人间烟火气摆进直播间</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：50/100</strong><div>热点类型：社会现象</div><div>热度信号：抖音单平台第15位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：把市井烟火气搬进直播间，有生活场景和直播文化观察点。</div><div>英文标题：Bringing Street-Level Bustle into Livestreams</div><div>推荐理由：直播与街头生活结合有社会观察价值，画面热闹，但需要具体人物案例增强故事性。</div><div>口播切入：从直播间里的市井舞台切入，观察普通人如何成为直播内容的一部分。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">11</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">社会现象</span><span class="rank-num ">16</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744103" target="_blank" class="news-link">星期一是红色的怎么说呢</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：45/100</strong><div>热点类型：社会现象</div><div>热度信号：抖音单平台第16位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：用颜色描述星期几的梗有轻量共鸣，适合做文化差异和通感讨论。</div><div>英文标题：Why Does Monday Feel Red?</div><div>推荐理由：表达轻巧、易引发共鸣，但需要解释中文语境下的联觉和玩梗方式。</div><div>口播切入：从“星期一是红色”的说法切入，聊颜色、情绪和通感的文化差异。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">12</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">25</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744351" target="_blank" class="news-link">烂奇迹翻唱挑战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：45/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第25位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：翻唱挑战参与门槛低、有二次创作空间，但需要歌曲认知。</div><div>英文标题：The ‘Bad Miracle’ Cover Challenge</div><div>推荐理由：音乐挑战易模仿，但缺少原曲背景时跨文化传播会打折。</div><div>口播切入：从翻唱挑战切入，展示不同用户如何用同一首歌做个人化演绎。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">13</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">网红</span><span class="rank-num ">29</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744965" target="_blank" class="news-link">影视飓风Tim开通个人账号</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：45/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第29位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：知名创作者开个人账号是创作者经济话题，但偏中文互联网圈层。</div><div>英文标题：Media Storm’s Tim Launches Personal Account</div><div>推荐理由：对内容创作者生态有观察价值，但跨文化认知依赖对原创作者的了解。</div><div>口播切入：从知名视频创作者开通个人账号切入，观察创作者品牌与个人IP的关系。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">14</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="category-tag">社会现象</span><span class="rank-num high">5</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743971" target="_blank" class="news-link">2027研究生报考人数347万</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：40/100</strong><div>热点类型：时事新闻</div><div>热度信号：抖音单平台第5位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：考研人数涉及教育和就业压力，具备社会讨论度，但需要背景解释。</div><div>英文标题：3.47 Million Apply for China’s 2027 Graduate Exam</div><div>推荐理由：教育话题有社会共鸣，但数字新闻视觉性弱，适合做数据背后的青年选择讨论。</div><div>口播切入：从考研人数切入，讨论中国年轻人面对教育竞争和就业压力的选择。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">15</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">东方美学</span><span class="rank-num ">19</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743842" target="_blank" class="news-link">昊天武道会扬州线下总决赛开战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：40/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第19位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：线下武道会有东方竞技视觉，但赛事本身圈层较窄。</div><div>英文标题：Haotian Martial Arts Finals Kick Off in Yangzhou</div><div>推荐理由：武术视觉有辨识度，跨文化吸引力尚可，但赛事背景需要补充。</div><div>口播切入：从线下武道会总决赛切入，展示竞技武术的现场氛围和视觉风格。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">16</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">6</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744137" target="_blank" class="news-link">以我之名为LPL加油</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：35/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第6位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：电竞粉丝集体助威有社群仪式感，但圈层门槛较高。</div><div>英文标题：LPL Fans Cheer in Their Own Names</div><div>推荐理由：粉丝文化有讨论度，但非电竞受众理解成本较高，叙事需补充赛事背景。</div><div>口播切入：从粉丝用名字为战队助威切入，观察电竞社群的集体仪式感。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">17</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">24</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745054" target="_blank" class="news-link">和范丞丞一起看昊天武道会</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：35/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第24位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：明星观赛联动有粉丝吸引力，但内容偏宣传。</div><div>英文标题：Watch the Haotian Martial Arts Tournament with Fan Chengcheng</div><div>推荐理由：明星带流但故事性弱，更适合粉丝向短片而非泛受众叙事。</div><div>口播切入：从明星陪看武道会切入，结合粉丝视角和赛事现场。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">18</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num top">3</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745092" target="_blank" class="news-link">解锁APEC限定“寻宝”路线</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>热点类型：时事新闻</div><div>热度信号：抖音单平台第3位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：APEC相关限定路线带有活动打卡和城市探索属性，但受众偏本地。</div><div>英文标题：Unlocking the APEC Treasure Hunt Route</div><div>推荐理由：事件性强但跨文化吸引力有限，更适合做背景解释而非独立故事。</div><div>口播切入：从国际会议期间的城市打卡路线切入，介绍限定路线为何受本地关注。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">19</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">8</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745079" target="_blank" class="news-link">EDG官宣CHICHOO离队</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第8位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：电竞选手离队是圈层新闻，粉丝关注度高但大众门槛高。</div><div>英文标题：EDG Announces CHICHOO’s Departure</div><div>推荐理由：对电竞粉丝有情绪价值，但缺少背景时难以吸引泛受众。</div><div>口播切入：从明星选手离队切入，解释电竞战队人员变动为何牵动粉丝。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">20</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">10</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744094" target="_blank" class="news-link">阿根廷vs乌拉圭</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第10位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：阿根廷对乌拉圭有足球话题性，但单条对阵信息内容较薄。</div><div>英文标题：Argentina vs. Uruguay</div><div>推荐理由：强队对阵有基础关注，但需要比赛亮点或球迷情绪才能支撑短视频。</div><div>口播切入：从南美足球对决切入，聚焦比赛看点或球迷反应。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">21</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">23</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744964" target="_blank" class="news-link">高校学子为BLG助威</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：30/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第23位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：高校助威体现电竞社群文化，但需要赛事背景。</div><div>英文标题：College Students Cheer for BLG</div><div>推荐理由：社群氛围有感染力，但非电竞受众需要解释BLG和赛事语境。</div><div>口播切入：从高校学生集体助威切入，观察电竞如何进入校园社群生活。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">22</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num high">4</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743675" target="_blank" class="news-link">油价下调 加满一箱油少花约26元</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：25/100</strong><div>热点类型：时事新闻</div><div>热度信号：抖音单平台第4位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：油价下调直接关系日常开支，属于民生信息，但跨文化讨论空间有限。</div><div>英文标题：Gas Prices Drop: Save About 26 Yuan per Fill-Up</div><div>推荐理由：民生信息有实用性，但缺少故事性和视觉性，海外受众需要本地背景。</div><div>口播切入：从一箱油少花多少钱切入，解释中国油价调整对普通车主的影响。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">23</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">7</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744709" target="_blank" class="news-link">上抖音看阿图什杯</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：25/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第7位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：地方杯赛和平台直播结合，偏本地体育内容。</div><div>英文标题：Watch the Atush Cup on Douyin</div><div>推荐理由：地域性强、跨文化门槛高，除非有突出人物或场面，否则难独立成片。</div><div>口播切入：从地方足球杯赛直播切入，展示中国基层体育赛事的现场氛围。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">24</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">明星</span><span class="rank-num ">20</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744280" target="_blank" class="news-link">蒋一帆沈阳为爱而歌歌友会</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：25/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第20位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：歌友会属于粉丝向活动，跨圈传播依赖艺人知名度。</div><div>英文标题：Jiang Yifan Holds Shenyang Fan Concert</div><div>推荐理由：粉丝向内容有基本盘，但缺少大众话题点，海外受众认知门槛较高。</div><div>口播切入：从歌友会现场切入，呈现歌手与粉丝的互动氛围。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">25</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">9</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744322" target="_blank" class="news-link">76人战胜猛龙</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：20/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第9位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：NBA赛果对篮球迷有吸引力，但单条赛果叙事性弱。</div><div>英文标题：76ers Beat the Raptors</div><div>推荐理由：赛果信息短平快，缺乏人物故事和视觉素材，适合体育垂类而非泛娱乐。</div><div>口播切入：从比赛结果切入，用关键回合或球员表现做成简短赛况。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">26</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num ">11</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743861" target="_blank" class="news-link">国务院安委会约谈11个市级政府</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：20/100</strong><div>热点类型：时事新闻</div><div>热度信号：抖音单平台第11位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：政府约谈涉及安全治理，新闻性强但海外短视频叙事门槛高。</div><div>英文标题：China’s Safety Committee Summons 11 City Governments</div><div>推荐理由：公共治理信息需要较多背景，视觉性和跨文化吸引力较弱。</div><div>口播切入：从安全生产约谈切入，解释地方政府为何被点名。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">27</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">12</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745172" target="_blank" class="news-link">我们再发光开播啦</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：20/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第12位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：开播信息偏节目宣传，缺少可独立讲述的人物或冲突。</div><div>英文标题：‘Our Light Shines Again’ Goes Live</div><div>推荐理由：宣传型内容依赖已有粉丝，对海外新受众吸引力有限。</div><div>口播切入：从新节目开播切入，介绍节目看点而非只报开播信息。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">28</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="category-tag">时事</span><span class="rank-num ">13</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2745027" target="_blank" class="news-link">“大同采空区塌陷引发强震”不实</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：20/100</strong><div>热点类型：时事新闻</div><div>热度信号：抖音单平台第13位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：辟谣信息有公共价值，但需要地域背景，跨文化吸引力弱。</div><div>英文标题：Datong Quake Rumor Is False</div><div>推荐理由：事实核查重要但故事性弱，适合本地新闻语境，不易独立传播。</div><div>口播切入：从辟谣切入，说明网络传言如何被证伪以及为何容易扩散。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">29</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">14</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2743685" target="_blank" class="news-link">斯马特被禁赛三场</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：20/100</strong><div>热点类型：娱乐热点</div><div>热度信号：抖音单平台第14位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：球员禁赛是体育圈层新闻，单条信息叙事空间有限。</div><div>英文标题：Smart Suspended for Three Games</div><div>推荐理由：体育处罚信息垂类属性强，缺少人物故事和视觉素材。</div><div>口播切入：从禁赛处罚切入，简述事件影响和球迷反应。</div></div>
+                        </div>
+                    </div>
+                    <div class="news-item ">
+                        <div class="news-number">30</div>
+                        <div class="news-content">
+                            <div class="news-header">
+                                <span class="source-name">抖音</span><span class="rank-num ">27</span><span class="time-info">23时58分</span>
+                            </div>
+                            <div class="news-title"><a href="https://www.douyin.com/hot/2744758" target="_blank" class="news-link">火影手游楔二川木实战</a>
+                            </div><div class="ai-analysis"><strong>海外短视频潜力：20/100</strong><div>热点类型：普通内容</div><div>热度信号：抖音单平台第27位、仅出现1次；单个平台/单次榜单，暂无法确认趋势。</div><div>走红原因：手游实战偏游戏圈层，缺少背景难以吸引非玩家。</div><div>英文标题：Naruto Mobile: Kawaki Gameplay</div><div>推荐理由：垂类游戏内容受众明确，但泛受众理解成本高、故事性弱。</div><div>口播切入：从角色实战切入，面向火影手游玩家展示操作和技能表现。</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    
