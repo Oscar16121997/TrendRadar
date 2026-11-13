@@ -19,6 +19,7 @@ import requests
 
 API_URL = "https://api.tikhub.io/api/v1/douyin/search/fetch_video_search_v2"
 MAX_PER_CATEGORY = 20
+MIN_LIKES_EXCLUSIVE = 5000  # Keep only videos with strictly more than 5,000 likes.
 MAX_PAGES_PER_KEYWORD = 2
 REQUEST_DELAY_SECONDS = 0.8
 OUTPUT_DIR = Path(os.environ.get("DOUYIN_OUTPUT_DIR", "output/douyin_full_run"))
@@ -574,6 +575,22 @@ def main():
         count = sum(1 for v in by_id.values() if category in v["categories"])
         print(f"{category} 去重并校验7天后：{count}条")
 
+    # Strict likes gate for the keyword-trend detector: keep only videos with > 5,000 likes.
+    unique_before_like_filter = len(by_id)
+    excluded_below_like_threshold = sum(
+        1 for video in by_id.values()
+        if not isinstance(video.get("likes"), (int, float)) or video.get("likes") <= MIN_LIKES_EXCLUSIVE
+    )
+    by_id = {
+        video_id: video for video_id, video in by_id.items()
+        if isinstance(video.get("likes"), (int, float)) and video.get("likes") > MIN_LIKES_EXCLUSIVE
+    }
+    print(
+        f"点赞门槛过滤：原始去重 {unique_before_like_filter} 条，"
+        f"保留点赞>{MIN_LIKES_EXCLUSIVE} 的 {len(by_id)} 条，"
+        f"排除 {excluded_below_like_threshold} 条"
+    )
+
     final_videos = []
     category_summary = {}
     for category in CATEGORY_KEYWORDS:
@@ -601,6 +618,9 @@ def main():
         "api_calls": total_calls,
         "estimated_api_cost_usd_at_0_01_per_call": round(total_calls * 0.01, 2),
         "raw_api_items_received": total_api_items,
+        "unique_videos_before_like_filter": unique_before_like_filter,
+        "excluded_below_like_threshold": excluded_below_like_threshold,
+        "min_likes_exclusive": MIN_LIKES_EXCLUSIVE,
         "unique_videos": len(by_id),
         "category_video_rows": len(final_videos),
         "categories": category_summary,
@@ -623,6 +643,7 @@ def main():
     summary["excluded_unclassified"] = excluded_unclassified
     summary["unique_videos"] = len(unique_videos)
     summary["topic_filter"] = "中国国内；国外/地域不明/未完成AI分类均排除"
+    summary["likes_filter"] = f"点赞数严格大于 {MIN_LIKES_EXCLUSIVE}"
 
     final_videos = []
     for category in CATEGORY_KEYWORDS:
