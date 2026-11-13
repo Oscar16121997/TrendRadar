@@ -23,11 +23,10 @@ msg["Subject"] = "营销号趋势日报 - " + datetime.now(timezone.utc).strftim
 msg["From"] = sender
 msg["To"] = recipient
 msg.set_content(
-    "附件是营销号趋势日报：包含指定抖音账号近7天发布、点赞大于2000、收藏大于100的视频，"
-    "并按 DeepSeek 海外选题综合评分降序排列。\n\n"
-    "HTML 可直接浏览；CSV 可用 Excel 筛选。\n"
+    "营销号趋势日报已附上 HTML 和 CSV。手机端可优先点击报告中的“手机打开抖音 App”；如果邮箱不支持 App 跳转，可点网页备用链接。\n\n"
     "评分仅基于视频标题/描述与互动数据，AI没有观看视频画面。"
 )
+msg.add_alternative(html_report.read_text(encoding="utf-8"), subtype="html")
 msg.add_attachment(html_report.read_bytes(), maintype="text", subtype="html",
                    filename="Marketing_Account_Trend.html")
 msg.add_attachment(csv_report.read_bytes(), maintype="text", subtype="csv",
