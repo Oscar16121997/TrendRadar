@@ -119,7 +119,7 @@ jobs:
           if-no-files-found: warn
 
   douyin_full_discovery:
-    if: ${{ inputs.run_douyin_full_discovery == true }}
+    if: ${{ github.event_name == 'schedule' || inputs.run_douyin_full_discovery == true }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -133,12 +133,22 @@ jobs:
       - name: Install collection dependency
         run: python -m pip install requests==2.32.4
 
+      - name: Validate China-only discovery and email scripts
+        run: python -m py_compile douyin_full_discovery.py send_douyin_report_email.py
+
       - name: Run full 8-category Douyin discovery
         env:
           TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DOUYIN_OUTPUT_DIR: output/douyin_full_run
         run: python douyin_full_discovery.py
+
+      - name: Email China-only Douyin trends
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DOUYIN_OUTPUT_DIR: output/douyin_full_run
+        run: python send_douyin_report_email.py
 
       - name: Upload full Douyin discovery report
         if: ${{ always() }}
