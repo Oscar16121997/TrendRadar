@@ -164,7 +164,7 @@ def main():
         except Exception as e:row['error']=str(e)[:500];print('账号失败 '+a['name']+'：'+str(e),file=sys.stderr)
         statuses.append(row);time.sleep(.25)
     videos=list(found.values());ai=score(videos,cfg['categories']) if videos else {'calls':0,'scored':0,'failed_batches':0,'model':MODEL}
-    summary={'detector':'营销号趋势','captured_at_utc':stamp,'account_count':len(cfg['accounts']),'accounts_resolved':sum(x['status']=='ok' for x in statuses),'qualified_videos':len(videos),'scored_videos':ai['scored'],'profile_requests':profile_calls,'post_page_requests':pages,'ai_analysis':ai,'accounts':statuses,'filters':{'lookback_days':7,'likes_gt':2000,'collects_gt':100},'score_weights':WEIGHTS}
+    summary={'detector':'营销号趋势','captured_at_utc':stamp,'account_count':len(cfg['accounts']),'accounts_resolved':sum(x['status']=='ok' for x in statuses),'qualified_videos':len(videos),'scored_videos':ai['scored'],'accounts_attempted':profile_calls,'post_page_requests':pages,'ai_analysis':ai,'accounts':statuses,'filters':{'lookback_days':7,'likes_gt':2000,'collects_gt':100},'score_weights':WEIGHTS}
     for p in write_reports(videos,summary):print('REPORT: '+str(p))
     print(json.dumps(summary,ensure_ascii=False,indent=2))
     if summary['accounts_resolved']==0:raise RuntimeError('所有账号解析失败')
