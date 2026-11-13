@@ -115,3 +115,33 @@ def score(videos,cats):
       +'subject_summary中文一句最多35字，具体说明人物/事件是什么；overseas_reason中文一句最多35字；content_angle中文最多30字；'
       +'english_hook简短自然英文开场；confidence为high/medium/low。资料不足须说明，不可猜。只输出JSON：'
       +'{"items":[{"id":0,"categories":[],"primary_category":"","category_fit_score":0,"overseas_suitability_score":0,"story_clarity_score":0,"visual_potential_score":0,"subject_summary":"","overseas_reason":"","content_angle":"","english_hook":"","confidence":"low"}]}')
+    for start in range(0,len(videos),12):
+        batch=videos[start:start+12]; rows=[{'id':i,'account':v['account_name'],'title':v['title'],'likes':v['likes'],'collects':v['collects'],'comments':v['comments']} for i,v in enumerate(batch)]
+        try:
+            r=s.post(DS,headers={'Authorization':'Bearer '+key,'Content-Type':'application/json'},json={'model':MODEL,'messages':[{'role':'system','content':sysmsg},{'role':'user','content':json.dumps(rows,ensure_ascii=False)}],'thinking':{'type':'disabled'},'temperature':.2,'max_tokens':8192,'response_format':{'type':'json_object'}},timeout=120)
+            calls+=1;r.raise_for_status(); ans=parse_json(r.json()['choices'][0]['message']['content']); byid={int(x['id']):x for x in ans.get('items',[]) if 'id' in x}
+            for i,v in enumerate(batch):
+                a=byid.get(i)
+                if not a:v['ai_status']='missing';continue
+                for k in WEIGHTS:v[k]=max(0,min(100,as_int(a.get(k)) or 0))
+                v['overall_score']=round(sum(v[k]*w for k,w in WEIGHTS.items()))
+                v['categories']=[x for x in a.get('categories',[]) if x in cats]; primary=a.get('primary_category')
+                v['primary_category']=primary if primary in cats else (v['categories'][0] if v['categories'] else '未分类')
+                for k in ('subject_summary','overseas_reason','content_angle','english_hook'):v[k]=str(a.get(k) or '')[:200]
+                conf=str(a.get('confidence') or 'low').lower();v['confidence']=conf if conf in ('high','medium','low') else 'low';v['ai_status']='completed';scored+=1
+        except Exception as e:
+            failed+=1;print('DeepSeek批次失败：'+str(e),file=sys.stderr)
+            for v in batch:v['ai_status']='failed'
+    return {'calls':calls,'scored':scored,'failed_batches':failed,'model':MODEL}
+
+def write_reports(videos,summary):
+    OUT.mkdir(parents=True,exist_ok=True); videos.sort(key=lambda v:(v.get('overall_score',-1),v.get('likes',-1)),reverse=True)
+    jp,cp,hp=OUT/'marketing_trend.json',OUT/'marketing_trend.csv',OUT/'marketing_trend.html'
+    jp.write_text(json.dumps({'summary':summary,'videos':videos,'weights':WEIGHTS},ensure_ascii=False,indent=2),encoding='utf-8')
+    cols=['rank','overall_score','primary_category','account_name','author','title','likes','collects','publish_time_utc','video_url','category_fit_score','overseas_suitability_score','story_clarity_score','visual_potential_score','subject_summary','overseas_reason','content_angle','english_hook','confidence']
+    with cp.open('w',newline='',encoding='utf-8-sig') as f:
+        w=csv.DictWriter(f,fieldnames=cols,extrasaction='ignore');w.writeheader()
+        for rank,v in enumerate(videos,1):row=dict(v);row['rank']=rank;w.writerow(row)
+    cards=[]
+    for rank,v in enumerate(videos,1):
+        url=html.escape(v.get('video_url') or '',quote=True); link='<a href="'+url+'" target="_blank">打开抖音视频 ↗</a>' if url else ''
