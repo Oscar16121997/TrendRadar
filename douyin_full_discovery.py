@@ -463,23 +463,32 @@ def write_reports(videos, summary):
                 f"<span>{label} <b>{value if value is not None else '—'}</b></span>"
                 for label, value in dimensions
             )
+            angle_html = (
+                f'<p><b>海外改编方向：</b>{angle}</p>'
+                if angle else ""
+            )
+            hook_html = (
+                f'<div class="hook"><span>英文口播开场</span><p>{hook}</p></div>'
+                if hook else ""
+            )
+            reason_html = html.escape(str(video.get("ai_reason") or ""))
             details = (
-                '<details class="more"><summary>查看评分依据与资料限制</summary>'
+                '<details class="more"><summary>更多分析</summary>'
                 f'<div class="dimensions">{dimension_html}</div>'
+                f'<p><b>评分理由：</b>{reason_html}</p>'
+                f'{angle_html}{hook_html}'
                 f'<p>{caveat}</p><p>判断可信度：{confidence}</p>'
                 '</details>'
             )
 
-        hook_html = f'<div class="hook"><span>英文口播开场</span><p>{hook}</p></div>' if hook else ""
         cards.append(
             f'<article class="video-card">'
             f'<div class="card-top"><span class="rank">#{rank:02d}</span>'
             f'<span class="score">{score_label}</span><div class="tags">{category_tags}</div></div>'
             f'<h2>{title}</h2>'
             f'<div class="meta">{author}　·　{likes_label} 赞　·　{published}</div>'
-            f'<p class="summary-line"><b>一句话概括：</b>{subject}</p>'
+            f'<p class="summary-line"><b>概括：</b>{subject}</p>'
             f'<p class="why-line">{why}</p>'
-            f'{hook_html}'
             f'<div class="card-bottom">{link}{details}</div>'
             f'</article>'
         )
