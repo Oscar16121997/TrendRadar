@@ -427,131 +427,68 @@ def write_reports(videos, summary):
     scored = sum(1 for v in html_videos if isinstance(v.get("ai_score"), (int, float)))
     generated_at = html.escape(str(summary.get("captured_at_utc", "")))
     cards = []
-
     for rank, video in enumerate(html_videos, 1):
         score = video.get("ai_score")
-        score_label = f"{int(score)} 分" if isinstance(score, (int, float)) else "未评分"
+        score_label = f"{int(score)}分" if isinstance(score, (int, float)) else "待评分"
         title = html.escape(str(video.get("title") or "（无标题）"))
         author = html.escape(str(video.get("author") or "未知作者"))
-        subject_raw = str(video.get("subject_explainer") or "标题未说明具体身份/经过，需打开原视频核实。").strip()
-        why_raw = str(video.get("why_attention") or video.get("ai_reason") or "").strip()
-        angle_raw = str(video.get("content_angle") or "").strip()
-        # Keep the digest compact even if the model returns longer text than requested.
-        subject = html.escape(subject_raw[:52])
-        why = html.escape(why_raw[:32])
-        angle = html.escape(angle_raw[:32])
-        hook = html.escape(str(video.get("english_hook") or ""))
-        caveat = html.escape(str(video.get("ai_caveat") or "AI 仅分析标题/描述和互动数据，未观看视频。"))
-        confidence = html.escape(str(video.get("ai_confidence") or "low")).upper()
+        subject = html.escape(str(video.get("subject_explainer") or "标题未说明具体内容，建议打开视频核实。").strip()[:65])
+        why = html.escape(str(video.get("why_attention") or "").strip()[:40])
+        angle = html.escape(str(video.get("content_angle") or "").strip()[:45])
+        hook = html.escape(str(video.get("english_hook") or "").strip()[:120])
         categories = video.get("html_categories") or video.get("categories") or ([video.get("category")] if video.get("category") else [])
-        category_tags = "".join(
-            f'<span class="tag">{html.escape(str(category))}</span>'
-            for category in categories
-        )
+        category_text = html.escape(" / ".join(str(x) for x in categories if x))
         likes = video.get("likes")
         likes_label = f"{int(likes):,}" if isinstance(likes, (int, float)) else "未知"
-        published = html.escape(str(video.get("publish_time_utc") or "未知"))
-        video_url = html.escape(str(video.get("video_url") or ""), quote=True)
+        published = html.escape(str(video.get("publish_time_utc") or "时间未知").replace("+00:00", " UTC"))
+        app_url = html.escape(str(video.get("video_url") or ""), quote=True)
         web_url = html.escape(str(video.get("web_url") or ""), quote=True)
-        link = (f'<a class="open-link" href="{video_url}">打开抖音 App ↗</a>' + (f' <a class="web-link" href="{web_url}">网页备用</a>' if web_url else "")) if video_url else '<span class="muted">暂无视频链接</span>'
-
-        details = ""
-        dimensions = [
-            ("故事性", video.get("story_score")),
-            ("视觉潜力", video.get("visual_potential_score")),
-            ("海外吸引力", video.get("global_appeal_score")),
-            ("原创性", video.get("originality_score")),
-            ("讨论空间", video.get("discussion_score")),
+        link_html = (
+            f'<a href="{app_url}" style="color:#1558c0;font-size:12px;font-weight:bold;text-decoration:none;">打开抖音 App ↗</a>'
+            + (f'&nbsp;&nbsp;<a href="{web_url}" style="color:#64748b;font-size:11px;text-decoration:none;">网页备用</a>' if web_url else "")
+        ) if app_url else '<span style="color:#888;font-size:11px;">暂无视频链接</span>'
+        content_rows = [
+            ("核心内容", subject),
+            ("关注点", why),
+            ("英文改编角度", angle),
+            ("口播开场", hook),
         ]
-        if any(value is not None for _, value in dimensions) or caveat:
-            dimension_html = "".join(
-                f"<span>{label} <b>{value if value is not None else '—'}</b></span>"
-                for label, value in dimensions
-            )
-            angle_html = (
-                f'<p><b>海外改编方向：</b>{angle}</p>'
-                if angle else ""
-            )
-            hook_html = (
-                f'<div class="hook"><span>英文口播开场</span><p>{hook}</p></div>'
-                if hook else ""
-            )
-            reason_html = html.escape(str(video.get("ai_reason") or ""))
-            details = (
-                '<details class="more"><summary>更多分析</summary>'
-                f'<div class="dimensions">{dimension_html}</div>'
-                f'<p><b>评分理由：</b>{reason_html}</p>'
-                f'{angle_html}{hook_html}'
-                f'<p>{caveat}</p><p>判断可信度：{confidence}</p>'
-                '</details>'
-            )
-
+        content_html = "".join(
+            f'<tr><td style="padding:2px 0;font-size:11px;line-height:1.35;color:#586575;vertical-align:top;width:82px;"><b>{label}</b></td><td style="padding:2px 0;font-size:12px;line-height:1.4;color:#263442;">{value}</td></tr>'
+            for label, value in content_rows if value
+        )
         cards.append(
-            f'<article class="video-card">'
-            f'<div class="card-top"><span class="rank">#{rank:02d}</span>'
-            f'<span class="score">{score_label}</span><div class="tags">{category_tags}</div></div>'
-            f'<h2>{title}</h2>'
-            f'<div class="meta">{author}　·　{likes_label} 赞　·　{published}</div>'
-            f'<p class="summary-line"><b>概括：</b>{subject}</p>'
-            f'<p class="why-line">{why}</p>'
-            f'<div class="card-bottom">{link}{details}</div>'
-            f'</article>'
+            '<tr><td style="padding:10px 11px;background:#ffffff;border-bottom:1px solid #dfe4ea;">'
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">'
+            f'<tr><td style="font-size:11px;line-height:1.3;color:#667085;padding:0 0 3px;">#{rank:02d} &nbsp; <b style="font-size:14px;color:#1558c0;">{score_label}</b> &nbsp; {category_text}</td></tr>'
+            f'<tr><td style="font-size:14px;line-height:1.35;font-weight:bold;color:#17212b;padding:2px 0 4px;">{title}</td></tr>'
+            f'<tr><td style="font-size:10px;line-height:1.35;color:#6b7280;padding:0 0 5px;">{author} &nbsp;·&nbsp; {likes_label}赞 &nbsp;·&nbsp; {published}</td></tr>'
+            f'<tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">{content_html}</table></td></tr>'
+            f'<tr><td style="padding:6px 0 0;">{link_html}</td></tr>'
+            '</table></td></tr>'
         )
 
-    empty_state = '<p class="empty">当前没有可展示的视频。</p>' if not cards else ""
-    html_doc = """<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>中国抖音热点选题日报</title>
-<style>
-:root{color-scheme:light;--ink:#17212b;--muted:#64748b;--line:#e6eaf0;--accent:#315efb;--paper:#f5f7fb}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-.wrap{max-width:760px;margin:0 auto;padding:9px 8px 20px}
-header{margin-bottom:7px}h1{font-size:19px;margin:0 0 3px;letter-spacing:-.2px}
-.subtitle{color:var(--muted);font-size:11px;line-height:1.35;margin:0}
-.summary{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0 9px}
-.stat{background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 8px;min-width:72px}
-.stat b{display:inline;font-size:13px;margin-right:3px}.stat span{font-size:10px;color:var(--muted)}
-.section-title{font-size:11px;color:var(--muted);font-weight:600;margin:0 0 5px}
-.video-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 9px;margin:0 0 6px;box-shadow:none}
-.card-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.rank{font-size:10px;font-weight:700;color:var(--muted)}
-.score{font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:3px 6px;font-size:11px}
-.tags{display:flex;gap:5px;flex-wrap:wrap}.tag{font-size:9px;color:#526078;background:#f0f3f8;border-radius:4px;padding:2px 4px}
-.video-card h2{font-size:14px;line-height:1.28;margin:4px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.meta{font-size:10px;color:var(--muted);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.summary-line{font-size:11px;line-height:1.35;margin:3px 0 2px;color:#273444;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.why-line{font-size:10px;line-height:1.3;margin:0;color:#64748b;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.hook{background:#f6f8ff;border-left:3px solid var(--accent);padding:5px 7px;margin:6px 0}
-.hook span{font-size:10px;color:var(--muted);font-weight:700}.hook p{font-size:11px;line-height:1.35;margin:2px 0 0}
-.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap;margin-top:5px}
-.open-link,.web-link{font-size:10px;font-weight:700;color:var(--accent);text-decoration:none}
-.more{font-size:10px;color:var(--muted)}.more summary{cursor:pointer}.dimensions{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0}
-.dimensions span{background:#f3f5f8;padding:3px 5px;border-radius:5px}
-.more p{line-height:1.4;margin:4px 0}.empty{color:var(--muted)}
-footer{color:var(--muted);font-size:10px;line-height:1.4;margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
-@media(max-width:600px){.wrap{padding:7px 6px 15px}.video-card{padding:7px 8px;margin-bottom:5px}h1{font-size:18px}.video-card h2{font-size:13px}}
-</style>
-</head>
-<body><main class="wrap">
-<header><h1>中国抖音热点选题日报</h1>
-<p class="subtitle">只保留中国国内趋势 · 最近7天 · 按英语短视频选题潜力排序</p></header>
-<div class="summary">
-<div class="stat"><b>""" + str(total_unique) + """</b><span>条去重视频</span></div>
-<div class="stat"><b>""" + str(scored) + """</b><span>条已有评分</span></div>
-<div class="stat"><b>8</b><span>个中国内容类别</span></div>
-<div class="stat"><b>""" + str(summary.get("excluded_foreign_topics", 0)) + """</b><span>排除海外热点</span></div>
-<div class="stat"><b>""" + str(summary.get("excluded_unclear_region", 0) + summary.get("excluded_unclassified", 0)) + """</b><span>排除地域不明/未分类</span></div>
-</div>
-<p class="section-title">中国本土高潜力选题 · 综合分降序</p>
-""" + empty_state + "".join(cards) + """
-<footer>
-排序依据：故事性 25%、海外受众吸引力 25%、视觉潜力 20%、原创性 15%、讨论空间 15%。地域过滤：只保留中国国内主题。<br>
-重要说明：AI 只读取视频标题/描述、作者和互动数据，没有实际观看视频或读取评论。人物身份、事件背景、画面内容如未在文案中明确提供，会标注资料不足。点赞数是采集时的累计值，不代表最近 7 天点赞增速。<br>
-采集时间（UTC）：""" + generated_at + """
-</footer></main></body></html>"""
+    total_unique = len(html_videos)
+    scored = sum(1 for v in html_videos if isinstance(v.get("ai_score"), (int, float)))
+    excluded_foreign = int(summary.get("excluded_foreign_topics", 0) or 0)
+    excluded_unclear = int(summary.get("excluded_unclear_region", 0) or 0)
+    excluded_unclassified = int(summary.get("excluded_unclassified", 0) or 0)
+    empty_state = '<tr><td style="padding:14px;background:#fff;color:#667085;font-size:13px;">本轮没有找到可确认属于中国国内的热点。</td></tr>' if not cards else ""
+    html_doc = (
+        '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中国抖音热点日报</title></head>'
+        '<body style="margin:0;padding:0;background:#f2f4f7;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;color:#17212b;">'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f2f4f7;"><tr><td align="center" style="padding:6px;">'
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:680px;border-collapse:collapse;">'
+        '<tr><td style="padding:9px 11px;background:#ffffff;border-bottom:2px solid #1558c0;">'
+        '<div style="font-size:18px;font-weight:bold;line-height:1.25;">中国抖音热点选题日报</div>'
+        '<div style="font-size:11px;color:#667085;line-height:1.4;padding-top:3px;">只保留中国国内趋势 · 最近7天 · 按英语短视频选题潜力排序</div>'
+        '</td></tr>'
+        f'<tr><td style="padding:6px 10px;background:#f8fafc;font-size:10px;line-height:1.5;color:#667085;">入选 {total_unique} 条 · 已评分 {scored} 条 · 排除海外 {excluded_foreign} 条 · 地域不明 {excluded_unclear} 条 · 未完成分类 {excluded_unclassified} 条</td></tr>'
+        '<tr><td style="padding:4px 10px;background:#eef2f7;font-size:10px;font-weight:bold;color:#475467;">热点列表（按综合分排序）</td></tr>'
+        + "".join(cards) + empty_state
+        + f'<tr><td style="padding:8px 10px;background:#f8fafc;font-size:10px;line-height:1.45;color:#667085;">评分权重：故事性25% · 海外吸引力25% · 视觉潜力20% · 原创性15% · 讨论空间15%。AI仅依据标题/描述和互动数据分析，未观看视频画面。<br>采集时间（UTC）：{generated_at}</td></tr>'
+        + '</table></td></tr></table></body></html>'
+    )
     html_path.write_text(html_doc, encoding="utf-8")
     print(f"HTML报告已按AI综合分全局排序：{html_path}")
     return [str(json_path), str(csv_path), str(html_path)]
