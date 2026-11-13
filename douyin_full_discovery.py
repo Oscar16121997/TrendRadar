@@ -504,49 +504,51 @@ def write_reports(videos, summary):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>抖音海外短视频选题日报</title>
+<title>中国抖音热点选题日报</title>
 <style>
 :root{color-scheme:light;--ink:#17212b;--muted:#64748b;--line:#e6eaf0;--accent:#315efb;--paper:#f5f7fb}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
-.wrap{max-width:980px;margin:0 auto;padding:34px 18px 60px}
-header{margin-bottom:22px}h1{font-size:28px;margin:0 0 8px;letter-spacing:-.5px}
-.subtitle{color:var(--muted);font-size:14px;line-height:1.7;margin:0}
-.summary{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 26px}
-.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:125px}
-.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
-.section-title{font-size:15px;color:var(--muted);font-weight:600;margin:0 0 12px}
-.video-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:19px 21px;margin:0 0 13px;box-shadow:0 2px 8px rgba(20,40,80,.035)}
+.wrap{max-width:760px;margin:0 auto;padding:9px 8px 20px}
+header{margin-bottom:7px}h1{font-size:19px;margin:0 0 3px;letter-spacing:-.2px}
+.subtitle{color:var(--muted);font-size:11px;line-height:1.35;margin:0}
+.summary{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0 9px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:7px;padding:5px 8px;min-width:72px}
+.stat b{display:inline;font-size:13px;margin-right:3px}.stat span{font-size:10px;color:var(--muted)}
+.section-title{font-size:11px;color:var(--muted);font-weight:600;margin:0 0 5px}
+.video-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 9px;margin:0 0 6px;box-shadow:none}
 .card-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.rank{font-size:13px;font-weight:700;color:var(--muted)}
-.score{font-weight:800;color:#fff;background:var(--accent);border-radius:7px;padding:5px 9px;font-size:14px}
-.tags{display:flex;gap:5px;flex-wrap:wrap}.tag{font-size:11px;color:#526078;background:#f0f3f8;border-radius:5px;padding:4px 7px}
-.video-card h2{font-size:18px;line-height:1.45;margin:10px 0 4px}
-.meta{font-size:12px;color:var(--muted);margin-bottom:9px}
-.summary-line{font-size:14px;line-height:1.55;margin:7px 0 4px;color:#273444}
-.why-line{font-size:12px;line-height:1.5;margin:0;color:#64748b}
-.hook{background:#f6f8ff;border-left:3px solid var(--accent);padding:8px 10px;margin:10px 0}
-.hook span{font-size:11px;color:var(--muted);font-weight:700}.hook p{font-size:13px;line-height:1.45;margin:3px 0 0}
-.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:13px}
-.open-link{font-size:13px;font-weight:700;color:var(--accent);text-decoration:none}.open-link:hover{text-decoration:underline}
-.more{font-size:12px;color:var(--muted)}.more summary{cursor:pointer}.dimensions{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
-.dimensions span{background:#f3f5f8;padding:5px 8px;border-radius:6px}
-.more p{line-height:1.6;margin:6px 0}.empty{color:var(--muted)}
-footer{color:var(--muted);font-size:11px;line-height:1.7;margin-top:25px;border-top:1px solid var(--line);padding-top:13px}
-@media(max-width:600px){.wrap{padding:23px 12px 40px}.video-card{padding:15px}h1{font-size:23px}.video-card h2{font-size:16px}}
+.rank{font-size:10px;font-weight:700;color:var(--muted)}
+.score{font-weight:800;color:#fff;background:var(--accent);border-radius:5px;padding:3px 6px;font-size:11px}
+.tags{display:flex;gap:5px;flex-wrap:wrap}.tag{font-size:9px;color:#526078;background:#f0f3f8;border-radius:4px;padding:2px 4px}
+.video-card h2{font-size:14px;line-height:1.28;margin:4px 0 2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{font-size:10px;color:var(--muted);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.summary-line{font-size:11px;line-height:1.35;margin:3px 0 2px;color:#273444;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.why-line{font-size:10px;line-height:1.3;margin:0;color:#64748b;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.hook{background:#f6f8ff;border-left:3px solid var(--accent);padding:5px 7px;margin:6px 0}
+.hook span{font-size:10px;color:var(--muted);font-weight:700}.hook p{font-size:11px;line-height:1.35;margin:2px 0 0}
+.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap;margin-top:5px}
+.open-link,.web-link{font-size:10px;font-weight:700;color:var(--accent);text-decoration:none}
+.more{font-size:10px;color:var(--muted)}.more summary{cursor:pointer}.dimensions{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0}
+.dimensions span{background:#f3f5f8;padding:3px 5px;border-radius:5px}
+.more p{line-height:1.4;margin:4px 0}.empty{color:var(--muted)}
+footer{color:var(--muted);font-size:10px;line-height:1.4;margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+@media(max-width:600px){.wrap{padding:7px 6px 15px}.video-card{padding:7px 8px;margin-bottom:5px}h1{font-size:18px}.video-card h2{font-size:13px}}
 </style>
 </head>
 <body><main class="wrap">
-<header><h1>抖音海外短视频选题日报</h1>
-<p class="subtitle">最近 7 天发布 · 按 DeepSeek 海外选题综合评分从高到低排列</p></header>
+<header><h1>中国抖音热点选题日报</h1>
+<p class="subtitle">只保留中国国内趋势 · 最近7天 · 按英语短视频选题潜力排序</p></header>
 <div class="summary">
 <div class="stat"><b>""" + str(total_unique) + """</b><span>条去重视频</span></div>
 <div class="stat"><b>""" + str(scored) + """</b><span>条已有评分</span></div>
-<div class="stat"><b>8</b><span>个内容类别</span></div>
+<div class="stat"><b>8</b><span>个中国内容类别</span></div>
+<div class="stat"><b>""" + str(summary.get("excluded_foreign_topics", 0)) + """</b><span>排除海外热点</span></div>
+<div class="stat"><b>""" + str(summary.get("excluded_unclear_region", 0) + summary.get("excluded_unclassified", 0)) + """</b><span>排除地域不明/未分类</span></div>
 </div>
-<p class="section-title">高潜力选题 · 综合分降序</p>
+<p class="section-title">中国本土高潜力选题 · 综合分降序</p>
 """ + empty_state + "".join(cards) + """
 <footer>
-排序依据：故事性 25%、海外受众吸引力 25%、视觉潜力 20%、原创性 15%、讨论空间 15%。<br>
+排序依据：故事性 25%、海外受众吸引力 25%、视觉潜力 20%、原创性 15%、讨论空间 15%。地域过滤：只保留中国国内主题。<br>
 重要说明：AI 只读取视频标题/描述、作者和互动数据，没有实际观看视频或读取评论。人物身份、事件背景、画面内容如未在文案中明确提供，会标注资料不足。点赞数是采集时的累计值，不代表最近 7 天点赞增速。<br>
 采集时间（UTC）：""" + generated_at + """
 </footer></main></body></html>"""
@@ -723,7 +725,7 @@ def main():
     if total_calls == 0:
         raise RuntimeError("No successful TikHub requests were completed.")
     if not final_videos:
-        raise RuntimeError("Requests completed but no videos passed ID/date validation.")
+        print("本轮没有符合中国国内地域规则的视频；仍生成空报告并发送每日摘要。")
 
 
 if __name__ == "__main__":
