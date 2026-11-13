@@ -70,7 +70,7 @@ def norm(raw,account,stamp):
     st=x.get('statistics') or x.get('stats') or {}; au=x.get('author') or {}
     vid=str(x.get('aweme_id') or x.get('item_id') or '').strip(); ts=as_int(x.get('create_time'))
     dt=datetime.fromtimestamp(ts,timezone.utc) if ts else None
-    share=x.get('share_info') or {}; url=x.get('share_url') or share.get('share_url') or ('https://www.douyin.com/video/'+vid if vid else '')
+    share=x.get('share_info') or {}; url=('snssdk1128://aweme/detail/'+vid if vid else '')
     return {'video_id':vid,'title':str(x.get('desc') or x.get('title') or '').strip(),'author':str(au.get('nickname') or account['name']),
       'account_name':account['name'],'account_identifier':account['identifier'],'likes':as_int(st.get('digg_count') or st.get('like_count')),
       'collects':as_int(st.get('collect_count') or st.get('favorite_count')),'comments':as_int(st.get('comment_count')),
@@ -144,7 +144,7 @@ def write_reports(videos,summary):
         for rank,v in enumerate(videos,1):row=dict(v);row['rank']=rank;w.writerow(row)
     cards=[]
     for rank,v in enumerate(videos,1):
-        url=html.escape(v.get('video_url') or '',quote=True); link='<a href="'+url+'" target="_blank">打开抖音视频 ↗</a>' if url else ''
+        url=html.escape(v.get('video_url') or '',quote=True); link='<a href="'+url+'" >手机打开抖音 App ↗</a>' if url else ''
         cards.append('<article><b>#'+str(rank)+' · '+str(v.get('overall_score','—'))+'分 · '+html.escape(v.get('primary_category','未分类'))+'</b><h2>'+html.escape(v.get('title') or '（无标题）')+'</h2><small>'+html.escape(v.get('account_name',''))+' · '+html.escape(v.get('author',''))+' · '+format(v.get('likes') or 0,',')+'赞 · '+format(v.get('collects') or 0,',')+'收藏</small><p><b>内容：</b>'+html.escape(v.get('subject_summary') or '标题信息不足，需人工核实。')+'</p>'+link+'<details><summary>评分细项 / 英文开场</summary><p>类目 '+str(v.get('category_fit_score','—'))+' · 海外 '+str(v.get('overseas_suitability_score','—'))+' · 故事 '+str(v.get('story_clarity_score','—'))+' · 视觉 '+str(v.get('visual_potential_score','—'))+'</p><p>'+html.escape(v.get('content_angle') or '')+'</p><p>'+html.escape(v.get('english_hook') or '')+'</p></details></article>')
     doc='<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>营销号趋势</title><style>body{font-family:Arial;background:#f5f7fb;color:#192432;max-width:900px;margin:auto;padding:24px}article{background:white;border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}small,details{color:#64748b;font-size:12px}h2{font-size:17px}p{line-height:1.6}a{color:#315efb}</style><h1>营销号趋势</h1><p>指定账号 · 最近7天 · 点赞&gt;2000 · 收藏&gt;100 · AI综合分降序</p><p>监控 '+str(summary['account_count'])+' 个账号 · 解析成功 '+str(summary['accounts_resolved'])+' · 达标 '+str(summary['qualified_videos'])+' · 已评分 '+str(summary['scored_videos'])+'</p>'+(''.join(cards) if cards else '<p>没有符合条件的视频。</p>')+'<footer>每个账号最多检查3页（每页20条）；AI只分析标题和互动数据，没有观看画面。</footer></html>'
     hp.write_text(doc,encoding='utf-8');return [jp,cp,hp]
