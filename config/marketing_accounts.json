@@ -1,0 +1,77 @@
+{
+  "detector_name": "营销号趋势",
+  "platform": "Douyin",
+  "filter": {
+    "lookback_days": 7,
+    "min_likes_exclusive": 2000,
+    "min_collects_exclusive": 100
+  },
+  "max_pages_per_account": 3,
+  "page_size": 20,
+  "accounts": [
+    {
+      "name": "大厂退役狗妹",
+      "identifier": "dcgmccc"
+    },
+    {
+      "name": "娱乐薯片崽",
+      "identifier": "LiGe91666"
+    },
+    {
+      "name": "挖了个趣",
+      "identifier": "1729497960"
+    },
+    {
+      "name": "摸娱背过",
+      "identifier": "MYbeiguo"
+    },
+    {
+      "name": "蘑菇咕叽叽",
+      "identifier": "qinghexianpe"
+    },
+    {
+      "name": "娱乐课代表孙小寒",
+      "identifier": "yulekedaibiao"
+    },
+    {
+      "name": "三言两娱",
+      "identifier": "189205417"
+    },
+    {
+      "name": "冰娱上上签",
+      "identifier": "Yss6999"
+    },
+    {
+      "name": "爆爆大王",
+      "identifier": "TQQWISH"
+    },
+    {
+      "name": "萤火虫娱乐",
+      "identifier": "YHCfan"
+    },
+    {
+      "name": "巨星火火",
+      "identifier": "huohuoyyds888"
+    },
+    {
+      "name": "冲浪鳕鱼",
+      "identifier": "61241962343"
+    }
+  ],
+  "categories": [
+    "时事",
+    "人物突然走红",
+    "网红",
+    "明星",
+    "社会现象",
+    "时尚潮流",
+    "东方美学",
+    "摄影美妆"
+  ],
+  "score_weights": {
+    "category_fit_score": 0.3,
+    "overseas_suitability_score": 0.4,
+    "story_clarity_score": 0.2,
+    "visual_potential_score": 0.1
+  }
+}
