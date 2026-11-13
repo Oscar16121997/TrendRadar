@@ -103,13 +103,13 @@ def analyze_douyin_videos_with_deepseek(videos):
             "originality_score（新鲜感/文化独特性）、"
             "discussion_score（讨论、共鸣或评论空间）。"
             "不允许把点赞量直接等同于内容质量；分数衡量的是内容作为海外短视频选题的潜力。"
-            "subject_explainer 必须用简体中文写1到3句，明确说明‘这是谁/这个人做什么’，或‘这是什么事件/具体发生了什么’。"
-            "如果是人物，要说明其职业、身份或主要活动，但只有标题/描述明确提供时才能写；"
-            "如果是事件，要说明核心行为、参与方或事情经过，但不得补充未提供的时间地点和背景。"
-            "如果是风格/趋势，要解释它具体是什么样的风格或行为。资料不足时必须直说‘仅凭当前视频标题/描述，暂无法确认……’，不能用空泛形容词代替解释。"
-            "why_attention 用简体中文写1句，说明标题/描述和互动数据能支持的关注原因；不能把点赞数当成走红速度。"
-            "reason 用简体中文写评分依据；english_hook 用自然简洁英文写口播开头；"
-            "content_angle 用简体中文写一句海外改编方向；caveat 标注资料不足或改编风险；confidence 只能是 high、medium、low。"
+            "subject_explainer 用简体中文写1句，控制在20至40个汉字，必须直接说清人物是谁/做什么，或事件具体发生了什么，或潮流是什么。"
+            "只写核心事实，不写背景铺陈、评价、重复标题；人物职业/身份和事件经过只能依据标题/描述明确提供的信息。"
+            "资料不足时简短写‘标题未说明具体身份/经过，需核实’，不要猜测，也不要写长段免责声明。"
+            "why_attention 用简体中文写1句，最多25个汉字，概括最直接的关注点；不能把点赞数当成走红速度。"
+            "reason 用简体中文写评分依据，最多45个汉字；english_hook 用自然简洁英文写一个短口播开场；"
+            "content_angle 用简体中文写短语或短句，最多25个汉字；caveat 最多25个汉字；confidence 只能是 high、medium、low。"
+            "输出必须精炼，不要使用‘值得关注的是’‘从某种程度上’等铺垫，不要重复标题。"
             "严格返回 JSON："
             "{\"items\":[{\"id\":0,\"story_score\":0,\"visual_potential_score\":0,"
             "\"global_appeal_score\":0,\"originality_score\":0,\"discussion_score\":0,"
@@ -429,11 +429,15 @@ def write_reports(videos, summary):
         score_label = f"{int(score)} 分" if isinstance(score, (int, float)) else "未评分"
         title = html.escape(str(video.get("title") or "（无标题）"))
         author = html.escape(str(video.get("author") or "未知作者"))
-        subject = html.escape(str(video.get("subject_explainer") or "仅凭当前视频标题/描述，暂无法确认这个人或事件的具体背景。"))
-        why = html.escape(str(video.get("why_attention") or video.get("ai_reason") or "暂无足够资料说明关注原因。"))
-        angle = html.escape(str(video.get("content_angle") or "暂时没有足够资料形成明确的海外改编角度。"))
+        subject_raw = str(video.get("subject_explainer") or "标题未说明具体身份/经过，需打开原视频核实。").strip()
+        why_raw = str(video.get("why_attention") or video.get("ai_reason") or "").strip()
+        angle_raw = str(video.get("content_angle") or "").strip()
+        # Keep the digest compact even if the model returns longer text than requested.
+        subject = html.escape(subject_raw[:52])
+        why = html.escape(why_raw[:32])
+        angle = html.escape(angle_raw[:32])
         hook = html.escape(str(video.get("english_hook") or ""))
-        caveat = html.escape(str(video.get("ai_caveat") or "AI 仅根据标题/描述和互动元数据判断，尚未核验视频画面。"))
+        caveat = html.escape(str(video.get("ai_caveat") or "AI 仅分析标题/描述和互动数据，未观看视频。"))
         confidence = html.escape(str(video.get("ai_confidence") or "low")).upper()
         categories = video.get("html_categories") or video.get("categories") or ([video.get("category")] if video.get("category") else [])
         category_tags = "".join(
@@ -473,9 +477,8 @@ def write_reports(videos, summary):
             f'<span class="score">{score_label}</span><div class="tags">{category_tags}</div></div>'
             f'<h2>{title}</h2>'
             f'<div class="meta">{author}　·　{likes_label} 赞　·　{published}</div>'
-            f'<section><h3>这是谁 / 这是什么事？</h3><p>{subject}</p></section>'
-            f'<section><h3>为什么值得关注？</h3><p>{why}</p></section>'
-            f'<section><h3>海外内容切入</h3><p>{angle}</p></section>'
+            f'<p class="summary-line"><b>一句话概括：</b>{subject}</p>'
+            f'<p class="why-line">{why}</p>'
             f'{hook_html}'
             f'<div class="card-bottom">{link}{details}</div>'
             f'</article>'
@@ -503,12 +506,12 @@ header{margin-bottom:22px}h1{font-size:28px;margin:0 0 8px;letter-spacing:-.5px}
 .rank{font-size:13px;font-weight:700;color:var(--muted)}
 .score{font-weight:800;color:#fff;background:var(--accent);border-radius:7px;padding:5px 9px;font-size:14px}
 .tags{display:flex;gap:5px;flex-wrap:wrap}.tag{font-size:11px;color:#526078;background:#f0f3f8;border-radius:5px;padding:4px 7px}
-.video-card h2{font-size:18px;line-height:1.5;margin:12px 0 5px}
-.meta{font-size:12px;color:var(--muted);margin-bottom:15px}
-section{margin:12px 0}section h3{font-size:13px;margin:0 0 4px;color:#475569}
-section p{font-size:14px;line-height:1.72;margin:0;color:#273444}
-.hook{background:#f6f8ff;border-left:3px solid var(--accent);padding:9px 12px;margin:13px 0}
-.hook span{font-size:11px;color:var(--muted);font-weight:700}.hook p{font-size:14px;line-height:1.5;margin:4px 0 0}
+.video-card h2{font-size:18px;line-height:1.45;margin:10px 0 4px}
+.meta{font-size:12px;color:var(--muted);margin-bottom:9px}
+.summary-line{font-size:14px;line-height:1.55;margin:7px 0 4px;color:#273444}
+.why-line{font-size:12px;line-height:1.5;margin:0;color:#64748b}
+.hook{background:#f6f8ff;border-left:3px solid var(--accent);padding:8px 10px;margin:10px 0}
+.hook span{font-size:11px;color:var(--muted);font-weight:700}.hook p{font-size:13px;line-height:1.45;margin:3px 0 0}
 .card-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:13px}
 .open-link{font-size:13px;font-weight:700;color:var(--accent);text-decoration:none}.open-link:hover{text-decoration:underline}
 .more{font-size:12px;color:var(--muted)}.more summary{cursor:pointer}.dimensions{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
