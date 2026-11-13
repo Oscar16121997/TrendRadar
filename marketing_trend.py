@@ -8,7 +8,7 @@ import requests
 BASE='https://api.tikhub.io'
 PROFILE=BASE+'/api/v1/douyin/web/handler_user_profile_v2'
 SHORT=BASE+'/api/v1/douyin/web/fetch_user_profile_by_short_id'
-UID=BASE+'/api/v1/douyin/web/handler_user_profile_v3'
+UID=BASE+'/api/v1/douyin/web/fetch_user_profile_by_uid'
 POSTS=BASE+'/api/v1/douyin/app/v3/fetch_user_post_videos'
 DS='https://api.deepseek.com/chat/completions'
 MODEL='deepseek-flash'
