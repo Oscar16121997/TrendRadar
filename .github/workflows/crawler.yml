@@ -3,7 +3,7 @@ name: Hot News Crawler
 on:
   schedule:
     # 我们使用的是 github 官方提供的资源来进行的推送，而每个账号的资源是限额的，为了不被官方判定为滥用而面临封号的风险，不建议比半小时更低
-    - cron: "0 8 * * *" # 每天 UTC 08:00 运行一次
+    - cron: "30 11 * * *" # 每天中国时间 19:30（UTC 11:30）
   workflow_dispatch:
     inputs:
       run_douyin_test:
@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   crawl:
-    if: ${{ inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true }}
+    if: ${{ github.event_name != 'schedule' && inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -81,11 +81,6 @@ jobs:
           GITHUB_ACTIONS: true
         run: python main.py
 
-      - name: Email daily report
-        env:
-          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        run: python send_email.py
 
       - name: Commit and push if changes
         run: |
@@ -200,7 +195,7 @@ jobs:
           if-no-files-found: warn
 
   marketing_trend:
-    if: ${{ inputs.run_marketing_trend == true }}
+    if: ${{ github.event_name == 'schedule' || inputs.run_marketing_trend == true }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
