@@ -103,6 +103,7 @@ def analyze_douyin_videos_with_deepseek(videos):
             "originality_score（新鲜感/文化独特性）、"
             "discussion_score（讨论、共鸣或评论空间）。"
             "不允许把点赞量直接等同于内容质量；分数衡量的是内容作为海外短视频选题的潜力。"
+            "地域过滤规则：只保留核心主题属于中国国内的趋势。topic_region 必须是中国国内、国外、不明确之一。核心事件/人物/潮流发生在中国国内，或主题本身是中国社会、人物、娱乐、网红、网络文化，选中国国内；核心主题发生在中国以外任何国家或地区（包括韩国、日本、美国、欧洲及其他地区），包括当地新闻、社会事件、外国明星/网红/娱乐及海外潮流，选国外；标题信息不足以判断地域，选不明确。只是顺带提及外国或作比较，而主体仍是中国内容的，选中国国内。最终仅保留 topic_region=中国国内，国外和不明确均排除。不要因单个国家关键词误删。"
             "subject_explainer 用简体中文写1句，控制在20至40个汉字，必须直接说清人物是谁/做什么，或事件具体发生了什么，或潮流是什么。"
             "只写核心事实，不写背景铺陈、评价、重复标题；人物职业/身份和事件经过只能依据标题/描述明确提供的信息。"
             "资料不足时简短写‘标题未说明具体身份/经过，需核实’，不要猜测，也不要写长段免责声明。"
@@ -114,7 +115,7 @@ def analyze_douyin_videos_with_deepseek(videos):
             "{\"items\":[{\"id\":0,\"story_score\":0,\"visual_potential_score\":0,"
             "\"global_appeal_score\":0,\"originality_score\":0,\"discussion_score\":0,"
             "\"subject_explainer\":\"\",\"why_attention\":\"\",\"reason\":\"\","
-            "\"english_hook\":\"\",\"content_angle\":\"\",\"caveat\":\"\",\"confidence\":\"low\"}]}"
+            "\"english_hook\":\"\",\"content_angle\":\"\",\"caveat\":\"\",\"topic_region\":\"不明确\",\"confidence\":\"low\"}]}"
         )
         user_prompt = (
             "请分析以下抖音视频元数据。请特别考虑英语受众是否能快速理解、"
@@ -174,6 +175,8 @@ def analyze_douyin_videos_with_deepseek(videos):
                 video["english_hook"] = str(ai.get("english_hook", ""))[:300]
                 video["content_angle"] = str(ai.get("content_angle", ""))[:500]
                 video["ai_caveat"] = str(ai.get("caveat", ""))[:400]
+                region = str(ai.get("topic_region", "不明确")).strip()
+                video["topic_region"] = region if region in ("中国国内", "国外", "不明确") else "不明确"
                 confidence = str(ai.get("confidence", "low")).lower()
                 video["ai_confidence"] = confidence if confidence in ("high", "medium", "low") else "low"
                 video["ai_analysis_status"] = "completed"
@@ -269,7 +272,8 @@ def normalize_video(entry, category, keyword, captured_at):
         "likes": likes,
         "publish_time_utc": published.isoformat() if published else "",
         "publish_timestamp": created,
-        "video_url": str(share_url or ""),
+        "video_url": (f"snssdk1128://aweme/detail/{aweme_id}" if aweme_id else ""),
+        "web_url": (f"https://www.douyin.com/video/{aweme_id}" if aweme_id else str(share_url or "")),
         "play_count": stats.get("play_count"),
         "comment_count": stats.get("comment_count"),
         "share_count": stats.get("share_count"),
@@ -379,7 +383,7 @@ def write_reports(videos, summary):
         "content_angle", "english_hook", "story_score", "visual_potential_score",
         "global_appeal_score", "originality_score", "discussion_score",
         "ai_confidence", "ai_analysis_status", "likes", "title", "author",
-        "publish_time_utc", "video_url", "video_id", "search_keyword",
+        "publish_time_utc", "video_url", "web_url", "video_id", "search_keyword", "topic_region",
         "play_count", "comment_count", "share_count", "ai_reason", "ai_caveat",
         "captured_at_utc",
     ]
@@ -448,7 +452,8 @@ def write_reports(videos, summary):
         likes_label = f"{int(likes):,}" if isinstance(likes, (int, float)) else "未知"
         published = html.escape(str(video.get("publish_time_utc") or "未知"))
         video_url = html.escape(str(video.get("video_url") or ""), quote=True)
-        link = f'<a class="open-link" href="{video_url}" target="_blank" rel="noopener">打开抖音视频 ↗</a>' if video_url else '<span class="muted">暂无视频链接</span>'
+        web_url = html.escape(str(video.get("web_url") or ""), quote=True)
+        link = (f'<a class="open-link" href="{video_url}">打开抖音 App ↗</a>' + (f' <a class="web-link" href="{web_url}">网页备用</a>' if web_url else "")) if video_url else '<span class="muted">暂无视频链接</span>'
 
         details = ""
         dimensions = [
@@ -667,11 +672,24 @@ def main():
     # Analyze each unique video once, then propagate the annotations to category rows.
     unique_videos = list(by_id.values())
     ai_summary = analyze_douyin_videos_with_deepseek(unique_videos)
+    unique_before_region_filter = len(unique_videos)
+    excluded_foreign = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "国外")
+    excluded_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "不明确")
+    excluded_unclassified = sum(1 for video in unique_videos if video.get("ai_analysis_status") != "completed")
+    unique_videos = [video for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "中国国内"]
     by_id = {video["video_id"]: video for video in unique_videos}
+    summary["unique_videos_before_region_filter"] = unique_before_region_filter
+    summary["excluded_foreign_topics"] = excluded_foreign
+    summary["excluded_unclear_region"] = excluded_unclear
+    summary["excluded_unclassified"] = excluded_unclassified
+    summary["unique_videos"] = len(unique_videos)
+    summary["topic_filter"] = "中国国内；国外/地域不明/未完成AI分类均排除"
 
     final_videos = []
     for category in CATEGORY_KEYWORDS:
         cat_videos = [v for v in by_id.values() if category in v.get("categories", [])]
+        if category in summary.get("categories", {}):
+            summary["categories"][category]["count"] = min(len(cat_videos), MAX_PER_CATEGORY)
         cat_videos.sort(
             key=lambda v: v.get("likes") if v.get("likes") is not None else -1,
             reverse=True,
