@@ -45,4 +45,4 @@ with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as smtp:
     smtp.login(SENDER, PASSWORD)
     smtp.send_message(message, from_addr=SENDER, to_addrs=RECIPIENTS)
 
-print(f"✅ DeepSeek 抖音选题报告已发送至 {\", \".join(RECIPIENTS)}")
+print("✅ DeepSeek 抖音选题报告已发送至 " + ", ".join(RECIPIENTS))
