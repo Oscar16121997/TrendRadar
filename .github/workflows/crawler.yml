@@ -21,6 +21,11 @@ on:
         required: false
         type: boolean
         default: false
+      run_marketing_trend:
+        description: "Run the separate 12-account marketing trend detector and email its HTML/CSV reports"
+        required: false
+        type: boolean
+        default: false
 
 # 添加权限设置
 permissions:
@@ -29,7 +34,7 @@ permissions:
 
 jobs:
   crawl:
-    if: ${{ inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true }}
+    if: ${{ inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -192,4 +197,41 @@ jobs:
         with:
           name: douyin-deepseek-analysis-report
           path: output/douyin_ai_analysis/
+          if-no-files-found: warn
+
+  marketing_trend:
+    if: ${{ inputs.run_marketing_trend == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install requests==2.32.4
+
+      - name: Run marketing account trend detector
+        env:
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          MARKETING_OUTPUT_DIR: output/marketing_trend
+        run: python marketing_trend.py
+
+      - name: Email marketing trend report
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MARKETING_OUTPUT_DIR: output/marketing_trend
+        run: python send_marketing_trend_email.py
+
+      - name: Upload marketing trend artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: marketing-trend-report
+          path: output/marketing_trend/
           if-no-files-found: warn
