@@ -103,16 +103,18 @@ def analyze_douyin_videos_with_deepseek(videos):
             "originality_score（新鲜感/文化独特性）、"
             "discussion_score（讨论、共鸣或评论空间）。"
             "不允许把点赞量直接等同于内容质量；分数衡量的是内容作为海外短视频选题的潜力。"
-            "reason 用简体中文写出基于现有资料的评分依据；"
-            "english_hook 用自然简洁的英文写一个可用于口播开头的钩子；"
-            "content_angle 用简体中文写一句改编方向；"
-            "caveat 用简体中文标注资料不足或改编风险；"
-            "confidence 只能是 high、medium、low。"
+            "subject_explainer 必须用简体中文写1到3句，明确说明‘这是谁/这个人做什么’，或‘这是什么事件/具体发生了什么’。"
+            "如果是人物，要说明其职业、身份或主要活动，但只有标题/描述明确提供时才能写；"
+            "如果是事件，要说明核心行为、参与方或事情经过，但不得补充未提供的时间地点和背景。"
+            "如果是风格/趋势，要解释它具体是什么样的风格或行为。资料不足时必须直说‘仅凭当前视频标题/描述，暂无法确认……’，不能用空泛形容词代替解释。"
+            "why_attention 用简体中文写1句，说明标题/描述和互动数据能支持的关注原因；不能把点赞数当成走红速度。"
+            "reason 用简体中文写评分依据；english_hook 用自然简洁英文写口播开头；"
+            "content_angle 用简体中文写一句海外改编方向；caveat 标注资料不足或改编风险；confidence 只能是 high、medium、low。"
             "严格返回 JSON："
             "{\"items\":[{\"id\":0,\"story_score\":0,\"visual_potential_score\":0,"
             "\"global_appeal_score\":0,\"originality_score\":0,\"discussion_score\":0,"
-            "\"reason\":\"\",\"english_hook\":\"\",\"content_angle\":\"\","
-            "\"caveat\":\"\",\"confidence\":\"low\"}]}"
+            "\"subject_explainer\":\"\",\"why_attention\":\"\",\"reason\":\"\","
+            "\"english_hook\":\"\",\"content_angle\":\"\",\"caveat\":\"\",\"confidence\":\"low\"}]}"
         )
         user_prompt = (
             "请分析以下抖音视频元数据。请特别考虑英语受众是否能快速理解、"
@@ -166,6 +168,8 @@ def analyze_douyin_videos_with_deepseek(videos):
                 overall = round(sum(scores[k] * weight for k, weight in AI_SCORE_WEIGHTS.items()))
                 video.update(scores)
                 video["ai_score"] = overall
+                video["subject_explainer"] = str(ai.get("subject_explainer", ""))[:700]
+                video["why_attention"] = str(ai.get("why_attention", ""))[:400]
                 video["ai_reason"] = str(ai.get("reason", ""))[:600]
                 video["english_hook"] = str(ai.get("english_hook", ""))[:300]
                 video["content_angle"] = str(ai.get("content_angle", ""))[:500]
@@ -342,84 +346,195 @@ def request_page(session, api_key, keyword, cursor, search_id, backtrace):
 
 
 def write_reports(videos, summary):
+    """Write source JSON/CSV and a clean, globally AI-score-ranked HTML report."""
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     json_path = OUTPUT_DIR / "douyin_full_discovery.json"
     csv_path = OUTPUT_DIR / "douyin_full_discovery.csv"
     html_path = OUTPUT_DIR / "douyin_full_discovery.html"
 
+    def rank_key(video):
+        score = video.get("ai_score")
+        likes = video.get("likes")
+        return (
+            score if isinstance(score, (int, float)) else -1,
+            likes if isinstance(likes, (int, float)) else -1,
+        )
+
+    sorted_rows = sorted(videos, key=rank_key, reverse=True)
     data = {
         "summary": summary,
         "methodology": {
             "platform": "Douyin App video search via TikHub",
             "publish_time_filter": "last 7 days (provider publish_time=7) plus local timestamp validation",
-            "sort": "most likes (sort_type=1)",
-            "categories": CATEGORY_KEYWORDS,
-            "max_per_category": MAX_PER_CATEGORY,
-            "max_pages_per_keyword": MAX_PAGES_PER_KEYWORD,
-            "important_limit": "Keyword-based search, not a full-site crawl. Rankings are top results for the listed search terms, not guaranteed global Douyin category rankings.",
-            "ai_analysis": "DeepSeek metadata-only editorial scoring. The model does not watch videos; story and visual claims are inferred only from supplied metadata.",
+            "sort": "globally sorted by DeepSeek editorial score; likes retained as a separate metric",
+            "important_limit": "Keyword-based search, not a full-site crawl. AI uses video title/description and metadata only; it does not watch the video.",
+            "ai_analysis": "Editorial potential scoring for English TikTok/Instagram adaptation. Unverified identity or event background must be marked as unknown.",
         },
-        "videos": videos,
+        "videos": sorted_rows,
     }
     json_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
     columns = [
-        "category", "category_rank_by_likes", "ai_rank", "ai_score",
-        "story_score", "visual_potential_score", "global_appeal_score",
-        "originality_score", "discussion_score", "ai_confidence",
-        "ai_analysis_status", "likes", "title", "author", "publish_time_utc",
-        "video_url", "video_id", "search_keyword", "play_count",
-        "comment_count", "share_count", "ai_reason", "english_hook",
-        "content_angle", "ai_caveat", "captured_at_utc",
+        "ai_rank", "ai_score", "category", "subject_explainer", "why_attention",
+        "content_angle", "english_hook", "story_score", "visual_potential_score",
+        "global_appeal_score", "originality_score", "discussion_score",
+        "ai_confidence", "ai_analysis_status", "likes", "title", "author",
+        "publish_time_utc", "video_url", "video_id", "search_keyword",
+        "play_count", "comment_count", "share_count", "ai_reason", "ai_caveat",
+        "captured_at_utc",
     ]
     with csv_path.open("w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=columns, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(videos)
+        for rank, video in enumerate(sorted_rows, 1):
+            row = dict(video)
+            row["ai_rank"] = rank
+            writer.writerow(row)
 
-    rows = []
-    for category in CATEGORY_KEYWORDS:
-        cat_videos = [v for v in videos if v["category"] == category]
-        cat_videos.sort(
-            key=lambda v: (
-                v.get("ai_score") if v.get("ai_score") is not None else -1,
-                v.get("likes") if v.get("likes") is not None else -1,
-            ),
-            reverse=True,
+    # Build one HTML card per unique video, combining its category labels.
+    unique_videos = {}
+    for video in sorted_rows:
+        video_id = str(video.get("video_id") or "").strip()
+        key = video_id or f"{video.get('title','')}|{video.get('author','')}"
+        if key not in unique_videos:
+            unique_videos[key] = dict(video)
+            unique_videos[key]["html_categories"] = []
+        current = unique_videos[key]
+        category_values = list(video.get("categories") or [])
+        if video.get("category"):
+            category_values.append(video["category"])
+        for category in category_values:
+            if category and category not in current["html_categories"]:
+                current["html_categories"].append(category)
+        if rank_key(video) > rank_key(current):
+            for field in (
+                "ai_score", "story_score", "visual_potential_score",
+                "global_appeal_score", "originality_score", "discussion_score",
+                "subject_explainer", "why_attention", "ai_reason",
+                "english_hook", "content_angle", "ai_caveat",
+                "ai_confidence", "ai_analysis_status", "likes",
+            ):
+                if video.get(field) is not None:
+                    current[field] = video[field]
+
+    html_videos = sorted(unique_videos.values(), key=rank_key, reverse=True)
+    completed = sum(1 for v in html_videos if v.get("ai_analysis_status") == "completed")
+    total_unique = len(html_videos)
+    scored = sum(1 for v in html_videos if isinstance(v.get("ai_score"), (int, float)))
+    generated_at = html.escape(str(summary.get("captured_at_utc", "")))
+    cards = []
+
+    for rank, video in enumerate(html_videos, 1):
+        score = video.get("ai_score")
+        score_label = f"{int(score)} 分" if isinstance(score, (int, float)) else "未评分"
+        title = html.escape(str(video.get("title") or "（无标题）"))
+        author = html.escape(str(video.get("author") or "未知作者"))
+        subject = html.escape(str(video.get("subject_explainer") or "仅凭当前视频标题/描述，暂无法确认这个人或事件的具体背景。"))
+        why = html.escape(str(video.get("why_attention") or video.get("ai_reason") or "暂无足够资料说明关注原因。"))
+        angle = html.escape(str(video.get("content_angle") or "暂时没有足够资料形成明确的海外改编角度。"))
+        hook = html.escape(str(video.get("english_hook") or ""))
+        caveat = html.escape(str(video.get("ai_caveat") or "AI 仅根据标题/描述和互动元数据判断，尚未核验视频画面。"))
+        confidence = html.escape(str(video.get("ai_confidence") or "low")).upper()
+        categories = video.get("html_categories") or video.get("categories") or ([video.get("category")] if video.get("category") else [])
+        category_tags = "".join(
+            f'<span class="tag">{html.escape(str(category))}</span>'
+            for category in categories
         )
-        rows.append(f"<h2>{html.escape(category)} ({len(cat_videos)}/{MAX_PER_CATEGORY})</h2>")
-        rows.append("<table><thead><tr><th>AI评分</th><th>点赞</th><th>标题 / 作者</th><th>AI判断与选题方向</th><th>英文开场</th><th>发布时间 UTC</th><th>视频</th></tr></thead><tbody>")
-        for video in cat_videos:
-            title = html.escape(video.get("title") or "(无标题)")
-            author = html.escape(video.get("author") or "(未知作者)")
-            published = html.escape(video.get("publish_time_utc") or "未知")
-            likes = video.get("likes")
-            likes_text = f"{likes:,}" if isinstance(likes, int) else "未知"
-            ai_score = video.get("ai_score")
-            ai_text = str(ai_score) if isinstance(ai_score, int) else "未评分"
-            reason = html.escape(video.get("ai_reason") or video.get("ai_caveat") or "暂无分析")
-            angle = html.escape(video.get("content_angle") or "")
-            hook = html.escape(video.get("english_hook") or "")
-            confidence = html.escape(video.get("ai_confidence") or "未评估")
-            link = html.escape(video.get("video_url") or "", quote=True)
-            link_cell = f'<a href="{link}" target="_blank" rel="noopener">打开抖音视频</a>' if link else "无链接"
-            rows.append(
-                f"<tr><td>{ai_text}<br><small>{confidence}</small></td>"
-                f"<td>{likes_text}</td><td>{title}<br><small>{author}</small></td>"
-                f"<td>{reason}<br><b>选题方向：</b>{angle}</td>"
-                f"<td>{hook}</td><td>{published}</td><td>{link_cell}</td></tr>"
+        likes = video.get("likes")
+        likes_label = f"{int(likes):,}" if isinstance(likes, (int, float)) else "未知"
+        published = html.escape(str(video.get("publish_time_utc") or "未知"))
+        video_url = html.escape(str(video.get("video_url") or ""), quote=True)
+        link = f'<a class="open-link" href="{video_url}" target="_blank" rel="noopener">打开抖音视频 ↗</a>' if video_url else '<span class="muted">暂无视频链接</span>'
+
+        details = ""
+        dimensions = [
+            ("故事性", video.get("story_score")),
+            ("视觉潜力", video.get("visual_potential_score")),
+            ("海外吸引力", video.get("global_appeal_score")),
+            ("原创性", video.get("originality_score")),
+            ("讨论空间", video.get("discussion_score")),
+        ]
+        if any(value is not None for _, value in dimensions) or caveat:
+            dimension_html = "".join(
+                f"<span>{label} <b>{value if value is not None else '—'}</b></span>"
+                for label, value in dimensions
             )
-        rows.append("</tbody></table>")
-    html_doc = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
-<title>抖音最近7天高赞视频发现报告</title>
-<style>body{font-family:Arial,sans-serif;margin:28px;color:#222}
-h1{margin-bottom:6px}small{color:#666}table{border-collapse:collapse;width:100%;margin:12px 0 28px}
-th,td{border:1px solid #ddd;padding:8px;text-align:left;vertical-align:top}
-th{background:#f3f5f7}td:first-child{white-space:nowrap}
-</style><body><h1>抖音最近7天高赞视频发现报告</h1>
-<p>按 DeepSeek 海外选题潜力评分排序，同时保留抖音当前累计点赞数。AI 只分析标题/描述与互动元数据，并没有观看视频；视觉潜力和故事性均为文字线索推断，需人工复核。</p>
-""" + "\n".join(rows) + "</body></html>"
+            details = (
+                '<details class="more"><summary>查看评分依据与资料限制</summary>'
+                f'<div class="dimensions">{dimension_html}</div>'
+                f'<p>{caveat}</p><p>判断可信度：{confidence}</p>'
+                '</details>'
+            )
+
+        hook_html = f'<div class="hook"><span>英文口播开场</span><p>{hook}</p></div>' if hook else ""
+        cards.append(
+            f'<article class="video-card">'
+            f'<div class="card-top"><span class="rank">#{rank:02d}</span>'
+            f'<span class="score">{score_label}</span><div class="tags">{category_tags}</div></div>'
+            f'<h2>{title}</h2>'
+            f'<div class="meta">{author}　·　{likes_label} 赞　·　{published}</div>'
+            f'<section><h3>这是谁 / 这是什么事？</h3><p>{subject}</p></section>'
+            f'<section><h3>为什么值得关注？</h3><p>{why}</p></section>'
+            f'<section><h3>海外内容切入</h3><p>{angle}</p></section>'
+            f'{hook_html}'
+            f'<div class="card-bottom">{link}{details}</div>'
+            f'</article>'
+        )
+
+    empty_state = '<p class="empty">当前没有可展示的视频。</p>' if not cards else ""
+    html_doc = """<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>抖音海外短视频选题日报</title>
+<style>
+:root{color-scheme:light;--ink:#17212b;--muted:#64748b;--line:#e6eaf0;--accent:#315efb;--paper:#f5f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:34px 18px 60px}
+header{margin-bottom:22px}h1{font-size:28px;margin:0 0 8px;letter-spacing:-.5px}
+.subtitle{color:var(--muted);font-size:14px;line-height:1.7;margin:0}
+.summary{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 26px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:125px}
+.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
+.section-title{font-size:15px;color:var(--muted);font-weight:600;margin:0 0 12px}
+.video-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:19px 21px;margin:0 0 13px;box-shadow:0 2px 8px rgba(20,40,80,.035)}
+.card-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.rank{font-size:13px;font-weight:700;color:var(--muted)}
+.score{font-weight:800;color:#fff;background:var(--accent);border-radius:7px;padding:5px 9px;font-size:14px}
+.tags{display:flex;gap:5px;flex-wrap:wrap}.tag{font-size:11px;color:#526078;background:#f0f3f8;border-radius:5px;padding:4px 7px}
+.video-card h2{font-size:18px;line-height:1.5;margin:12px 0 5px}
+.meta{font-size:12px;color:var(--muted);margin-bottom:15px}
+section{margin:12px 0}section h3{font-size:13px;margin:0 0 4px;color:#475569}
+section p{font-size:14px;line-height:1.72;margin:0;color:#273444}
+.hook{background:#f6f8ff;border-left:3px solid var(--accent);padding:9px 12px;margin:13px 0}
+.hook span{font-size:11px;color:var(--muted);font-weight:700}.hook p{font-size:14px;line-height:1.5;margin:4px 0 0}
+.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:13px}
+.open-link{font-size:13px;font-weight:700;color:var(--accent);text-decoration:none}.open-link:hover{text-decoration:underline}
+.more{font-size:12px;color:var(--muted)}.more summary{cursor:pointer}.dimensions{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.dimensions span{background:#f3f5f8;padding:5px 8px;border-radius:6px}
+.more p{line-height:1.6;margin:6px 0}.empty{color:var(--muted)}
+footer{color:var(--muted);font-size:11px;line-height:1.7;margin-top:25px;border-top:1px solid var(--line);padding-top:13px}
+@media(max-width:600px){.wrap{padding:23px 12px 40px}.video-card{padding:15px}h1{font-size:23px}.video-card h2{font-size:16px}}
+</style>
+</head>
+<body><main class="wrap">
+<header><h1>抖音海外短视频选题日报</h1>
+<p class="subtitle">最近 7 天发布 · 按 DeepSeek 海外选题综合评分从高到低排列</p></header>
+<div class="summary">
+<div class="stat"><b>""" + str(total_unique) + """</b><span>条去重视频</span></div>
+<div class="stat"><b>""" + str(scored) + """</b><span>条已有评分</span></div>
+<div class="stat"><b>8</b><span>个内容类别</span></div>
+</div>
+<p class="section-title">高潜力选题 · 综合分降序</p>
+""" + empty_state + "".join(cards) + """
+<footer>
+排序依据：故事性 25%、海外受众吸引力 25%、视觉潜力 20%、原创性 15%、讨论空间 15%。<br>
+重要说明：AI 只读取视频标题/描述、作者和互动数据，没有实际观看视频或读取评论。人物身份、事件背景、画面内容如未在文案中明确提供，会标注资料不足。点赞数是采集时的累计值，不代表最近 7 天点赞增速。<br>
+采集时间（UTC）：""" + generated_at + """
+</footer></main></body></html>"""
     html_path.write_text(html_doc, encoding="utf-8")
+    print(f"HTML报告已按AI综合分全局排序：{html_path}")
     return [str(json_path), str(csv_path), str(html_path)]
 
 
