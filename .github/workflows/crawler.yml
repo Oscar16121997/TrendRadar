@@ -214,6 +214,12 @@ jobs:
       - name: Install dependencies
         run: python -m pip install requests==2.32.4
 
+      - name: Validate marketing detector files
+        run: |
+          python -m py_compile marketing_trend.py send_marketing_trend_email.py
+          python -m json.tool config/marketing_accounts.json > /dev/null
+          echo "Marketing detector syntax and account config are valid."
+
       - name: Run marketing account trend detector
         env:
           TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
