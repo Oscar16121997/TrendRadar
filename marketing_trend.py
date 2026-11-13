@@ -70,3 +70,48 @@ def norm(raw,account,stamp):
     st=x.get('statistics') or x.get('stats') or {}; au=x.get('author') or {}
     vid=str(x.get('aweme_id') or x.get('item_id') or '').strip(); ts=as_int(x.get('create_time'))
     dt=datetime.fromtimestamp(ts,timezone.utc) if ts else None
+    share=x.get('share_info') or {}; url=x.get('share_url') or share.get('share_url') or ('https://www.douyin.com/video/'+vid if vid else '')
+    return {'video_id':vid,'title':str(x.get('desc') or x.get('title') or '').strip(),'author':str(au.get('nickname') or account['name']),
+      'account_name':account['name'],'account_identifier':account['identifier'],'likes':as_int(st.get('digg_count') or st.get('like_count')),
+      'collects':as_int(st.get('collect_count') or st.get('favorite_count')),'comments':as_int(st.get('comment_count')),
+      'shares':as_int(st.get('share_count')),'publish_timestamp':ts,'publish_time_utc':dt.isoformat() if dt else '',
+      'video_url':str(url or ''),'captured_at_utc':stamp}
+
+def collect(s,key,account,profile,cutoff,stamp):
+    out=[]; cur=0; pages=0; older=False; missing=0
+    for _ in range(MAX_PAGES):
+        d=get(s,key,POSTS,{'sec_user_id':profile['sec_user_id'],'max_cursor':cur,'count':20,'sort_type':0})
+        pages+=1; arr=find_posts(d)
+        if not arr:break
+        for raw in arr:
+            v=norm(raw,account,stamp)
+            if not v['video_id'] or not v['publish_timestamp']:continue
+            dt=datetime.fromtimestamp(v['publish_timestamp'],timezone.utc)
+            if dt<cutoff:older=True;continue
+            if v['collects'] is None:missing+=1;continue
+            if v['likes'] is not None and v['likes']>2000 and v['collects']>100:out.append(v)
+        nxt=None; more=False
+        for x in walk(d):
+            if x.get('max_cursor') is not None:nxt=x['max_cursor']
+            if x.get('has_more') is not None:more=str(x['has_more']).lower() in ('1','true','yes')
+        if older or not more or nxt is None or str(nxt)==str(cur):break
+        cur=nxt;time.sleep(.25)
+    return out,{'pages_checked':pages,'qualified_videos':len(out),'missing_collect_count':missing,'reached_older_than_7_days':older}
+
+def parse_json(txt):
+    txt=(txt or '').strip()
+    if txt.startswith(chr(96)*3):txt=txt.split('\n',1)[-1].removesuffix(chr(96)*3).strip()
+    a,b=txt.find('{'),txt.rfind('}')
+    if a<0 or b<a:raise ValueError('DeepSeek JSON parse failed')
+    return json.loads(txt[a:b+1])
+
+def score(videos,cats):
+    key=os.getenv('DEEPSEEK_API_KEY','').strip()
+    if not key:raise RuntimeError('Missing DEEPSEEK_API_KEY')
+    s=requests.Session(); calls=scored=failed=0
+    sysmsg=('你是面向英语受众的短视频选题编辑。只能依据标题/文案和互动数字判断，没有观看画面或评论，不得编造。'
+      +'类目只能从：'+'、'.join(cats)+'。四项0-100整数：category_fit_score类目匹配30%、overseas_suitability_score海外适配40%、'
+      +'story_clarity_score故事清晰20%、visual_potential_score视觉潜力10%。程序计算加权总分。'
+      +'subject_summary中文一句最多35字，具体说明人物/事件是什么；overseas_reason中文一句最多35字；content_angle中文最多30字；'
+      +'english_hook简短自然英文开场；confidence为high/medium/low。资料不足须说明，不可猜。只输出JSON：'
+      +'{"items":[{"id":0,"categories":[],"primary_category":"","category_fit_score":0,"overseas_suitability_score":0,"story_clarity_score":0,"visual_potential_score":0,"subject_summary":"","overseas_reason":"","content_angle":"","english_hook":"","confidence":"low"}]}')
