@@ -14,7 +14,7 @@ The workflow is `.github/workflows/crawler.yml`, on branch `main`. It already ha
 - Job conditions that run bot 2 and bot 3 when their corresponding inputs are true.
 - Bot 4's job condition is manual-input-only.
 
-The native GitHub schedule currently remains set to UTC 13:34 as a temporary fallback. Do not leave it enabled at the same time as the external daily job once the external job is active, or both may start duplicate runs and send duplicate emails.
+The native GitHub `schedule:` trigger has been removed after the external dispatch test was accepted by GitHub. cron-job.org is now the only daily starter. The `workflow_dispatch:` trigger remains enabled for manual runs.
 
 ## Configure cron-job.org
 
@@ -57,11 +57,10 @@ GitHub's workflow-dispatch endpoint requires Actions repository permission `writ
 
 ## Safe test and cutover
 
-1. Keep the native GitHub schedule enabled while creating the external job, but do not wait for its daily 13:34 schedule yet.
-2. Use cron-job.org's manual `Run now` / test function at a time other than 13:34 UTC. This avoids colliding with the native scheduled run.
+1. The native GitHub `schedule:` trigger is already disabled. Keep the cron-job.org recurring job enabled every day at 15:00 Europe/Paris.
+2. Use cron-job.org's manual `Run now` / test function once to verify the external request.
 3. Check the corresponding GitHub Actions run. It should have event `workflow_dispatch`, and jobs `douyin_full_discovery` and `marketing_trend` must both finish with `success`. Check that both emails arrive.
-4. After this test succeeds, disable the native GitHub cron by removing only the `schedule:` trigger from `.github/workflows/crawler.yml` and committing the change. Keep `workflow_dispatch:` enabled.
-5. Keep the cron-job.org recurring job enabled at 13:34 UTC. From then on it is the sole daily starter.
+4. Do not re-enable the native GitHub `schedule:` trigger while cron-job.org is active, or duplicate daily runs may occur.
 
 Do not activate the external job's recurring 13:34 schedule before the native schedule has been removed, otherwise both can run on the same day.
 
