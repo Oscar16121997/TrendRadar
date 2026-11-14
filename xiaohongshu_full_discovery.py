@@ -421,9 +421,9 @@ footer{margin-top:24px;border-top:1px solid #dfe4ea;padding-top:12px}
 
 
 def main():
-    api_key = os.environ.get("TIKHUB_API_KEY", "").strip()
+    api_key = os.environ.get("TIKHUB_XIAOHONGSHU_API_KEY", "").strip()
     if not api_key:
-        raise RuntimeError("Missing TIKHUB_API_KEY GitHub Secret.")
+        raise RuntimeError("Missing TIKHUB_XIAOHONGSHU_API_KEY GitHub Secret.")
     now = datetime.now(timezone.utc)
     captured_at = now.isoformat()
     cutoff = now - timedelta(days=7)
