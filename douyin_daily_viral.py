@@ -644,7 +644,7 @@ def main():
     excluded_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "不明确")
     excluded_unclassified = sum(1 for video in unique_videos if video.get("ai_analysis_status") != "completed")
     excluded_political = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_promotion") == "是")
-    excluded_political_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_promotion") != "否")
+    excluded_political_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_promotion") == "不确定")
     unique_videos = [video for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "中国国内" and video.get("political_promotion") == "否"]
     by_id = {video["video_id"]: video for video in unique_videos}
     summary["unique_videos_before_region_filter"] = unique_before_region_filter
