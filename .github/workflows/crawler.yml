@@ -316,7 +316,7 @@ jobs:
 
       - name: Run Xiaohongshu trend discovery
         env:
-          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          TIKHUB_XIAOHONGSHU_API_KEY: ${{ secrets.TIKHUB_XIAOHONGSHU_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           XHS_OUTPUT_DIR: output/xiaohongshu_full_discovery
         run: python xiaohongshu_full_discovery.py
