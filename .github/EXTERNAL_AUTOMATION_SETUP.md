@@ -53,7 +53,7 @@ Set the request body to exactly:
 }
 ```
 
-GitHub's workflow-dispatch endpoint requires Actions repository permission `write` for a fine-grained token. A successful request returns HTTP `200` with a workflow run ID and URL.
+GitHub's workflow-dispatch endpoint requires Actions repository permission `write` for a fine-grained token. A successful workflow-dispatch request returns HTTP `204 No Content`. The workflow run appears in GitHub Actions shortly afterward.
 
 ## Safe test and cutover
 
@@ -67,7 +67,7 @@ Do not activate the external job's recurring 13:34 schedule before the native sc
 
 ## What each success signal means
 
-- cron-job.org HTTP 200 means GitHub accepted the dispatch request and returned a run ID. It does not prove the jobs completed.
+- cron-job.org HTTP 204 means GitHub accepted the dispatch request. It does not prove the jobs completed.
 - GitHub Actions job conclusions `success` for both bot jobs confirm that both workflows completed through their email steps.
 - Check the recipient inboxes to confirm actual delivery. A successful SMTP send does not guarantee inbox placement.
 
