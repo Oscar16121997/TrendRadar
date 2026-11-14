@@ -72,9 +72,9 @@ The email uses a separate subject and attachments from the Douyin report.
 If the search step returns HTTP 403 with `API Token lacks required permissions`:
 
 1. Open [TikHub API token management](https://user.tikhub.io/dashboard/api).
-2. Edit the same API Token used by the GitHub repository secret `TIKHUB_API_KEY`.
+2. Edit the same API Token used by the GitHub repository secret `TIKHUB_XIAOHONGSHU_API_KEY`.
 3. Enable the Xiaohongshu App V2 route / permission containing `search_notes`.
 4. Keep any existing Douyin permissions enabled; do not remove them.
-5. Save the token permission changes and rerun the workflow. If TikHub issues a replacement token instead of editing the existing one, update GitHub's `TIKHUB_API_KEY` repository secret with that new token.
+5. Save the token permission changes and rerun the workflow. If TikHub issues a replacement token instead of editing the existing one, update GitHub's `TIKHUB_XIAOHONGSHU_API_KEY` repository secret with that new token.
 
 A 403 permission failure is not a successful API response. TikHub's FAQ says only HTTP 200 successful requests are billed; failed requests are not charged. The bot now stops on the first 401/403 instead of repeatedly trying every category.
