@@ -411,3 +411,181 @@ footer{margin-top:24px;border-top:1px solid #dfe4ea;padding-top:12px}
 """ + html.escape(str(summary.get("captured_at_utc", ""))) + """ UTC</footer></main></body></html>"""
     html_path.write_text(html_doc, encoding="utf-8")
     return [str(json_path), str(csv_path), str(html_path)]
+
+
+def main():
+    api_key = os.environ.get("TIKHUB_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("Missing TIKHUB_API_KEY GitHub Secret.")
+    now = datetime.now(timezone.utc)
+    captured_at = now.isoformat()
+    cutoff = now - timedelta(days=7)
+    session = requests.Session()
+    by_id = {}
+    category_calls = defaultdict(int)
+    category_errors = {}
+    total_calls = 0
+    total_api_items = 0
+    unknown_publish_time = 0
+    max_total_calls = sum(len(words) * MAX_PAGES_PER_KEYWORD for words in CATEGORY_KEYWORDS.values())
+    print(f"开始小红书采集：{len(CATEGORY_KEYWORDS)} 类，目标每类最多 {MAX_PER_CATEGORY} 条")
+    print("API 请求上限：" + str(max_total_calls) + " 次；按每次 $0.01 粗略估算最高约 $" + f"{max_total_calls * 0.01:.2f}")
+    print("搜索排序：最多点赞；发布时间：最近一周")
+
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        print(f"\n== {category} ==")
+        for keyword in keywords:
+            search_id = ""
+            search_session_id = ""
+            for page_no in range(1, MAX_PAGES_PER_KEYWORD + 1):
+                category_count = sum(
+                    1 for note in by_id.values() if category in note.get("categories", [])
+                )
+                if category_count >= MAX_PER_CATEGORY or total_calls >= max_total_calls:
+                    break
+                try:
+                    rows, search_id, search_session_id, has_more = request_page(
+                        session, api_key, keyword, page_no, search_id, search_session_id
+                    )
+                    total_calls += 1
+                    category_calls[category] += 1
+                    total_api_items += len(rows)
+                    print(f"{category} / {keyword} / page {page_no}: {len(rows)} 条")
+                    for raw in rows:
+                        note = normalize_note(raw, category, keyword, captured_at)
+                        if not note["note_id"]:
+                            continue
+                        published = parse_publish_time(note.get("publish_timestamp"))
+                        if published and (published < cutoff or published > now + timedelta(minutes=10)):
+                            continue
+                        if not published:
+                            unknown_publish_time += 1
+                        note_id = note["note_id"]
+                        existing = by_id.get(note_id)
+                        if existing:
+                            if category not in existing["categories"]:
+                                existing["categories"].append(category)
+                            if keyword not in existing["matched_keywords"]:
+                                existing["matched_keywords"].append(keyword)
+                            for metric in ("likes", "collects", "comments", "shares"):
+                                if note.get(metric) is not None and (
+                                    existing.get(metric) is None or note[metric] > existing[metric]
+                                ):
+                                    existing[metric] = note[metric]
+                            if not existing.get("note_url") and note.get("note_url"):
+                                existing["note_url"] = note["note_url"]
+                        else:
+                            note["categories"] = [category]
+                            note["matched_keywords"] = [keyword]
+                            by_id[note_id] = note
+                    if page_no >= MAX_PAGES_PER_KEYWORD or has_more is False:
+                        break
+                    if has_more is None and not search_id and not search_session_id:
+                        break
+                    time.sleep(REQUEST_DELAY_SECONDS)
+                except Exception as exc:
+                    category_errors.setdefault(category, []).append(
+                        {"keyword": keyword, "page": page_no, "error": str(exc)}
+                    )
+                    print(f"⚠️ {category}/{keyword} 采集失败：{exc}", file=sys.stderr)
+                    break
+        count = sum(1 for note in by_id.values() if category in note.get("categories", []))
+        print(f"{category} 去重后：{count} 条")
+
+    unique_before_like_filter = len(by_id)
+    by_id = {
+        note_id: note for note_id, note in by_id.items()
+        if isinstance(note.get("likes"), (int, float)) and note["likes"] > MIN_LIKES_EXCLUSIVE
+    }
+    unique_after_like_filter = len(by_id)
+    print(
+        f"点赞过滤：去重 {unique_before_like_filter} 条，"
+        f"保留点赞 > {MIN_LIKES_EXCLUSIVE} 的 {unique_after_like_filter} 条"
+    )
+
+    unique_notes = list(by_id.values())
+    ai_summary = analyze_notes_with_deepseek(unique_notes)
+    unique_before_region_filter = len(unique_notes)
+    excluded_foreign = sum(
+        1 for note in unique_notes
+        if note.get("ai_analysis_status") == "completed" and note.get("topic_region") == "国外"
+    )
+    excluded_unclear = sum(
+        1 for note in unique_notes
+        if note.get("ai_analysis_status") == "completed" and note.get("topic_region") == "不明确"
+    )
+    excluded_unclassified = sum(
+        1 for note in unique_notes if note.get("ai_analysis_status") != "completed"
+    )
+    unique_notes = [
+        note for note in unique_notes
+        if note.get("ai_analysis_status") == "completed" and note.get("topic_region") == "中国国内"
+    ]
+    by_id = {note["note_id"]: note for note in unique_notes}
+
+    final_notes = []
+    category_summary = {}
+    for category in CATEGORY_KEYWORDS:
+        category_notes = [
+            note for note in by_id.values() if category in note.get("categories", [])
+        ]
+        category_notes.sort(
+            key=lambda note: (
+                note.get("ai_score") if note.get("ai_score") is not None else -1,
+                note.get("likes") if note.get("likes") is not None else -1,
+            ),
+            reverse=True,
+        )
+        selected = category_notes[:MAX_PER_CATEGORY]
+        category_summary[category] = {
+            "count": len(selected),
+            "target": MAX_PER_CATEGORY,
+            "api_calls": category_calls[category],
+            "top_likes": selected[0].get("likes") if selected else None,
+            "complete": len(selected) >= MAX_PER_CATEGORY,
+        }
+        for rank, note in enumerate(selected, 1):
+            row = dict(note)
+            row["category"] = category
+            row["category_rank"] = rank
+            final_notes.append(row)
+
+    summary = {
+        "captured_at_utc": captured_at,
+        "platform": "Xiaohongshu",
+        "api_endpoint": API_URL,
+        "time_filter": "一周内 (TikHub provider-side)",
+        "sort_type": "popularity_descending",
+        "categories": category_summary,
+        "api_calls": total_calls,
+        "estimated_api_cost_usd_at_0_01_per_call": round(total_calls * 0.01, 2),
+        "max_api_calls": max_total_calls,
+        "raw_api_items_received": total_api_items,
+        "unknown_publish_time_count": unknown_publish_time,
+        "unique_notes_before_like_filter": unique_before_like_filter,
+        "unique_notes_after_like_filter": unique_after_like_filter,
+        "min_likes_exclusive": MIN_LIKES_EXCLUSIVE,
+        "unique_notes_before_region_filter": unique_before_region_filter,
+        "excluded_foreign_topics": excluded_foreign,
+        "excluded_unclear_region": excluded_unclear,
+        "excluded_unclassified": excluded_unclassified,
+        "final_notes": len(final_notes),
+        "topic_filter": "中国国内；国外/地域不明/未完成 AI 分类均排除",
+        "errors": category_errors,
+        "deepseek_analysis": ai_summary,
+    }
+    paths = write_reports(final_notes, summary)
+    print("\n小红书采集完成")
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    for report_path in paths:
+        print("REPORT: " + report_path)
+    if total_calls == 0:
+        raise RuntimeError("No successful TikHub Xiaohongshu search requests were completed.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exc:
+        print(f"❌ 小红书采集失败：{exc}", file=sys.stderr)
+        raise SystemExit(1)
