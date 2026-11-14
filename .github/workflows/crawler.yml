@@ -28,6 +28,11 @@ on:
         required: false
         type: boolean
         default: false
+      run_xiaohongshu_full_discovery:
+        description: "Manually run the 9-category Xiaohongshu trend discovery (up to 36 TikHub requests; estimated max $0.36)"
+        required: false
+        type: boolean
+        default: false
 
 # 添加权限设置
 permissions:
@@ -36,7 +41,7 @@ permissions:
 
 jobs:
   crawl:
-    if: ${{ github.event_name != 'schedule' && inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true && inputs.run_douyin_daily_viral != true }}
+    if: ${{ github.event_name != 'schedule' && inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true && inputs.run_douyin_daily_viral != true && inputs.run_xiaohongshu_full_discovery != true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -288,4 +293,45 @@ jobs:
         with:
           name: marketing-trend-report
           path: output/marketing_trend/
+          if-no-files-found: warn
+
+  xiaohongshu_full_discovery:
+    # Manual opt-in only. It is intentionally not part of cron-job.org daily bots 2 and 3.
+    if: ${{ inputs.run_xiaohongshu_full_discovery == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: python -m pip install requests==2.32.4
+
+      - name: Validate Xiaohongshu detector and email scripts
+        run: python -m py_compile xiaohongshu_full_discovery.py send_xiaohongshu_report_email.py
+
+      - name: Run Xiaohongshu trend discovery
+        env:
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          XHS_OUTPUT_DIR: output/xiaohongshu_full_discovery
+        run: python xiaohongshu_full_discovery.py
+
+      - name: Email Xiaohongshu trend report
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          XHS_OUTPUT_DIR: output/xiaohongshu_full_discovery
+        run: python send_xiaohongshu_report_email.py
+
+      - name: Upload Xiaohongshu report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: xiaohongshu-full-discovery-report
+          path: output/xiaohongshu_full_discovery/
           if-no-files-found: warn
