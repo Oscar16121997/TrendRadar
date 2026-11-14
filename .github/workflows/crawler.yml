@@ -3,7 +3,7 @@ name: Hot News Crawler
 on:
   schedule:
     # 我们使用的是 github 官方提供的资源来进行的推送，而每个账号的资源是限额的，为了不被官方判定为滥用而面临封号的风险，不建议比半小时更低
-    - cron: "30 11 * * *" # 每天中国时间 19:30（UTC 11:30）
+    - cron: "40 12 * * *" # 每天中国时间 20:40（UTC 12:40）
   workflow_dispatch:
     inputs:
       run_douyin_test:
