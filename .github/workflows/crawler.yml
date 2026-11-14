@@ -292,29 +292,3 @@ jobs:
           name: marketing-trend-report
           path: output/marketing_trend/
           if-no-files-found: warn
-
-  report_daily_status:
-    name: Report daily bot status to Healthchecks
-    needs: [douyin_full_discovery, marketing_trend]
-    if: ${{ always() && (github.event_name == 'schedule' || (inputs.run_douyin_full_discovery == true && inputs.run_marketing_trend == true)) }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send success or failure heartbeat
-        env:
-          HEALTHCHECKS_PING_URL: ${{ secrets.HEALTHCHECKS_PING_URL }}
-          DOUYIN_RESULT: ${{ needs.douyin_full_discovery.result }}
-          MARKETING_RESULT: ${{ needs.marketing_trend.result }}
-        run: |
-          if [ -z "$HEALTHCHECKS_PING_URL" ]; then
-            echo "::warning::HEALTHCHECKS_PING_URL is not configured yet; skipping external heartbeat."
-            exit 0
-          fi
-
-          if [ "$DOUYIN_RESULT" = "success" ] && [ "$MARKETING_RESULT" = "success" ]; then
-            echo "Both scheduled bots completed successfully."
-            curl --retry 3 --retry-delay 5 --fail --silent --show-error "$HEALTHCHECKS_PING_URL"
-          else
-            echo "At least one scheduled bot did not complete successfully."
-            curl --retry 3 --retry-delay 5 --fail --silent --show-error "${HEALTHCHECKS_PING_URL%/}/fail"
-            exit 1
-          fi
