@@ -30,8 +30,8 @@ In cron-job.org, create one job with these settings:
 - Title: `TrendRadar - bots 2 and 3`
 - URL: `https://api.github.com/repos/Oscar16121997/TrendRadar/actions/workflows/416533052/dispatches`
 - Request method: `POST`
-- Schedule: every day at `13:34`
-- Time zone: `UTC`
+- Schedule: every day at `15:00`
+- Time zone: `Europe/Paris`
 - Enable the job's failure notification.
 - Save the response / execution history if the option is available.
 
@@ -61,8 +61,6 @@ GitHub's workflow-dispatch endpoint requires Actions repository permission `writ
 2. Use cron-job.org's manual `Run now` / test function once to verify the external request.
 3. Check the corresponding GitHub Actions run. It should have event `workflow_dispatch`, and jobs `douyin_full_discovery` and `marketing_trend` must both finish with `success`. Check that both emails arrive.
 4. Do not re-enable the native GitHub `schedule:` trigger while cron-job.org is active, or duplicate daily runs may occur.
-
-Do not activate the external job's recurring 13:34 schedule before the native schedule has been removed, otherwise both can run on the same day.
 
 ## What each success signal means
 
