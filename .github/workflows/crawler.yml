@@ -26,6 +26,11 @@ on:
         required: false
         type: boolean
         default: false
+      run_douyin_daily_viral:
+        description: "Run daily Douyin high-like videos published today, over 10,000 likes, excluding political propaganda"
+        required: false
+        type: boolean
+        default: false
 
 # 添加权限设置
 permissions:
@@ -34,7 +39,7 @@ permissions:
 
 jobs:
   crawl:
-    if: ${{ github.event_name != 'schedule' && inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true }}
+    if: ${{ github.event_name != 'schedule' && inputs.run_douyin_test != true && inputs.run_douyin_full_discovery != true && inputs.run_douyin_reanalysis != true && inputs.run_marketing_trend != true && inputs.run_douyin_daily_viral != true }}
     runs-on: ubuntu-latest
 
     steps:
@@ -156,6 +161,46 @@ jobs:
         with:
           name: douyin-full-discovery-report
           path: output/douyin_full_run/
+          if-no-files-found: warn
+
+  douyin_daily_viral:
+    if: ${{ github.event_name == 'schedule' || inputs.run_douyin_daily_viral == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install collection dependency
+        run: python -m pip install requests==2.32.4
+
+      - name: Validate daily viral detector and email scripts
+        run: python -m py_compile douyin_daily_viral.py send_douyin_daily_viral_email.py
+
+      - name: Run daily high-like Douyin discovery
+        env:
+          TIKHUB_API_KEY: ${{ secrets.TIKHUB_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DOUYIN_DAILY_VIRAL_OUTPUT_DIR: output/douyin_daily_viral
+        run: python douyin_daily_viral.py
+
+      - name: Email daily high-like Douyin trends
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DOUYIN_DAILY_VIRAL_OUTPUT_DIR: output/douyin_daily_viral
+        run: python send_douyin_daily_viral_email.py
+
+      - name: Upload daily high-like report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: douyin-daily-viral-report
+          path: output/douyin_daily_viral/
           if-no-files-found: warn
 
   douyin_reanalysis:
