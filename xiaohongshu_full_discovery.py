@@ -183,3 +183,57 @@ def normalize_note(entry, category, keyword, captured_at):
         "search_keyword": keyword, "captured_at_utc": captured_at,
         "source": "TikHub Xiaohongshu App V2 search_notes",
     }
+
+
+def parse_deepseek_json(content):
+    text = (content or "").strip()
+    fence = chr(96) * 3
+    if text.startswith(fence):
+        text = text.split("\n", 1)[-1]
+        if text.endswith(fence):
+            text = text[:-3].strip()
+    start, end = text.find("{"), text.rfind("}")
+    if start < 0 or end < start:
+        raise ValueError("DeepSeek response does not contain JSON")
+    return json.loads(text[start:end + 1])
+
+
+def analyze_notes_with_deepseek(notes):
+    api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    if not api_key:
+        print("⚠️ DEEPSEEK_API_KEY 未配置，跳过 AI 评分")
+        return {"calls": 0, "analyzed": 0, "failed_batches": 0, "status": "missing_api_key"}
+    session = requests.Session()
+    calls = 0
+    analyzed = 0
+    failed = 0
+    for batch_no, start in enumerate(range(0, len(notes), AI_BATCH_SIZE), 1):
+        batch = notes[start:start + AI_BATCH_SIZE]
+        payload = []
+        for index, note in enumerate(batch):
+            payload.append({
+                "id": index, "title": note.get("title", ""),
+                "description": note.get("desc", "")[:1200],
+                "author": note.get("author", ""), "categories": note.get("categories", []),
+                "likes": note.get("likes"), "collects": note.get("collects"),
+                "comments": note.get("comments"), "shares": note.get("shares"),
+                "publish_time_utc": note.get("publish_time_utc", ""),
+            })
+        system_prompt = (
+            "你是面向英语受众的短视频选题编辑，评估中国小红书笔记是否适合改编为 TikTok/Instagram 英语内容。"
+            "只能依据标题、正文描述、作者、类别、发布时间和互动数字判断。"
+            "你没有观看图片/视频或读取评论正文，不能声称看到了画面、装修细节、穿搭细节或人物行为。"
+            "视觉潜力只能根据文字线索谨慎推断，证据不足时降低分数和 confidence。"
+            "互动数字是采集时累计值，不代表最近7天新增速度；不能单凭互动量证明正在爆红。"
+            "不要编造人物身份、故事、设计风格、装修预算、材质或穿搭单品。"
+            "只保留核心主题属于中国国内的内容。topic_region 必须是中国国内、国外、不明确之一。"
+            "中国本土人物、生活方式、穿搭、家居、装修和社会文化选中国国内；"
+            "核心主题属于中国以外地区选国外；资料不足选不明确。最终仅保留中国国内。"
+            "五项评分均为0到100整数：story_score、visual_potential_score、global_appeal_score、originality_score、discussion_score。"
+            "不要把点赞或收藏量直接等同于内容质量。"
+            "subject_explainer 用简体中文写1句说明笔记具体分享什么；why_attention 最多25字；reason 最多45字。"
+            "english_hook 用自然简洁英文写短口播开场；content_angle 和 caveat 各最多25字。"
+            "资料不足时写标题和正文未说明，需打开笔记核实，不要猜测。"
+            "严格返回 JSON，items 数组每条含 id、五项评分、subject_explainer、why_attention、reason、"
+            "english_hook、content_angle、caveat、topic_region、confidence。"
+        )
