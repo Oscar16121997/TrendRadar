@@ -237,3 +237,80 @@ def analyze_notes_with_deepseek(notes):
             "严格返回 JSON，items 数组每条含 id、五项评分、subject_explainer、why_attention、reason、"
             "english_hook、content_angle、caveat、topic_region、confidence。"
         )
+
+        user_prompt = (
+            "请评估以下小红书笔记作为英语短视频选题的潜力，重点关注生活方式、穿搭、装修和美学内容。"
+            "没有文字证据时不要推测画面或事实。\n"
+            + json.dumps(payload, ensure_ascii=False)
+        )
+        try:
+            response = session.post(
+                DEEPSEEK_API_URL,
+                headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
+                json={
+                    "model": DEEPSEEK_MODEL,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    "thinking": {"type": "disabled"},
+                    "temperature": 0.2,
+                    "max_tokens": 8192,
+                    "response_format": {"type": "json_object"},
+                },
+                timeout=120,
+            )
+            calls += 1
+            response.raise_for_status()
+            parsed = parse_deepseek_json(response.json()["choices"][0]["message"]["content"])
+            items = parsed.get("items", []) if isinstance(parsed, dict) else []
+            by_id = {}
+            for item in items:
+                try:
+                    by_id[int(item["id"])] = item
+                except (KeyError, TypeError, ValueError):
+                    continue
+            for index, note in enumerate(batch):
+                item = by_id.get(index)
+                if item is None:
+                    note["ai_analysis_status"] = "missing_result"
+                    continue
+                scores = {}
+                for field in AI_SCORE_WEIGHTS:
+                    try:
+                        scores[field] = max(0, min(100, int(item.get(field, 0))))
+                    except (TypeError, ValueError):
+                        scores[field] = 0
+                note.update(scores)
+                note["ai_score"] = round(sum(scores[k] * v for k, v in AI_SCORE_WEIGHTS.items()))
+                for field, source, limit in (
+                    ("subject_explainer", "subject_explainer", 700),
+                    ("why_attention", "why_attention", 400),
+                    ("ai_reason", "reason", 600),
+                    ("english_hook", "english_hook", 300),
+                    ("content_angle", "content_angle", 500),
+                    ("ai_caveat", "caveat", 400),
+                ):
+                    note[field] = str(item.get(source, ""))[:limit]
+                region = str(item.get("topic_region", "不明确")).strip()
+                note["topic_region"] = region if region in ("中国国内", "国外", "不明确") else "不明确"
+                confidence = str(item.get("confidence", "low")).lower()
+                note["ai_confidence"] = confidence if confidence in ("high", "medium", "low") else "low"
+                note["ai_analysis_status"] = "completed"
+                analyzed += 1
+            print(
+                f"DeepSeek 第 {batch_no} 批完成：{len(batch)} 条输入，"
+                f"{sum(1 for n in batch if n.get('ai_analysis_status') == 'completed')} 条成功评分"
+            )
+        except Exception as exc:
+            failed += 1
+            print(f"DeepSeek 第 {batch_no} 批分析失败：{exc}", file=sys.stderr)
+            for note in batch:
+                note.setdefault("ai_analysis_status", "failed")
+
+    return {
+        "calls": calls, "analyzed": analyzed, "failed_batches": failed,
+        "status": "completed" if analyzed == len(notes) else "partial",
+        "model": DEEPSEEK_MODEL, "batch_size": AI_BATCH_SIZE,
+        "score_weights": AI_SCORE_WEIGHTS,
+    }
