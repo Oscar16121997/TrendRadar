@@ -314,3 +314,100 @@ def analyze_notes_with_deepseek(notes):
         "model": DEEPSEEK_MODEL, "batch_size": AI_BATCH_SIZE,
         "score_weights": AI_SCORE_WEIGHTS,
     }
+
+
+def write_reports(notes, summary):
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    json_path = OUTPUT_DIR / "xiaohongshu_full_discovery.json"
+    csv_path = OUTPUT_DIR / "xiaohongshu_full_discovery.csv"
+    html_path = OUTPUT_DIR / "xiaohongshu_full_discovery.html"
+
+    def rank_key(note):
+        score = note.get("ai_score")
+        likes = note.get("likes")
+        return (
+            score if isinstance(score, (int, float)) else -1,
+            likes if isinstance(likes, (int, float)) else -1,
+        )
+
+    sorted_notes = sorted(notes, key=rank_key, reverse=True)
+    json_path.write_text(
+        json.dumps({"summary": summary, "notes": sorted_notes}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    columns = [
+        "ai_rank", "ai_score", "category", "subject_explainer", "why_attention",
+        "content_angle", "english_hook", "story_score", "visual_potential_score",
+        "global_appeal_score", "originality_score", "discussion_score",
+        "ai_confidence", "ai_analysis_status", "likes", "collects", "comments",
+        "shares", "title", "desc", "author", "publish_time_utc", "note_url",
+        "note_id", "search_keyword", "topic_region", "ai_reason", "ai_caveat",
+        "captured_at_utc",
+    ]
+    with csv_path.open("w", newline="", encoding="utf-8-sig") as file:
+        writer = csv.DictWriter(file, fieldnames=columns, extrasaction="ignore")
+        writer.writeheader()
+        for rank, note in enumerate(sorted_notes, 1):
+            row = dict(note)
+            row["ai_rank"] = rank
+            writer.writerow(row)
+
+    cards = []
+    for rank, note in enumerate(sorted_notes, 1):
+        score = note.get("ai_score")
+        score_label = f"{int(score)}分" if isinstance(score, (int, float)) else "待评分"
+        title = html.escape(str(note.get("title") or note.get("desc") or "（无标题）")[:180])
+        desc = html.escape(str(note.get("desc") or "").strip()[:420])
+        author = html.escape(str(note.get("author") or "未知作者"))
+        categories = html.escape(" / ".join(note.get("categories") or [note.get("category", "")]))
+        likes = f"{note['likes']:,}" if isinstance(note.get("likes"), int) else "未知"
+        collects = f"{note['collects']:,}" if isinstance(note.get("collects"), int) else "未知"
+        comments = f"{note['comments']:,}" if isinstance(note.get("comments"), int) else "未知"
+        published = html.escape(str(note.get("publish_time_utc") or "时间未知"))
+        url = html.escape(str(note.get("note_url") or ""), quote=True)
+        link = f'<a href="{url}" target="_blank" rel="noopener">打开小红书笔记 ↗</a>' if url else "暂无笔记链接"
+        explainer = html.escape(str(note.get("subject_explainer") or "标题和正文未说明，需打开笔记核实。")[:240])
+        why = html.escape(str(note.get("why_attention") or "")[:150])
+        angle = html.escape(str(note.get("content_angle") or "")[:180])
+        hook = html.escape(str(note.get("english_hook") or "")[:180])
+        reason = html.escape(str(note.get("ai_reason") or "")[:220])
+        caveat = html.escape(str(note.get("ai_caveat") or "")[:160])
+        cards.append(
+            '<article class="card">'
+            f'<div class="top"><span>#{rank:02d}</span><b class="score">{score_label}</b><span class="tag">{categories}</span></div>'
+            f'<h2>{title}</h2><p class="meta">{author} · {likes}赞 · {collects}收藏 · {comments}评论 · {published}</p>'
+            f'<p>{desc}</p><div class="section"><b>核心内容</b><p>{explainer}</p></div>'
+            f'<div class="section"><b>关注点</b><p>{why}</p></div>'
+            f'<div class="section"><b>海外改编角度</b><p>{angle}</p></div>'
+            f'<div class="section"><b>英文口播开场</b><p>{hook}</p></div>'
+            f'<details><summary>评分依据与资料限制</summary><p>{reason}</p><p>{caveat}</p>'
+            f'<p>判断可信度：{html.escape(str(note.get("ai_confidence") or "low"))}</p></details>'
+            f'<div class="link">{link}</div></article>'
+        )
+
+    summary_line = (
+        "去重笔记 " + str(summary.get("unique_notes_before_like_filter", 0))
+        + " 条；点赞筛选后 " + str(summary.get("unique_notes_after_like_filter", 0))
+        + " 条；最终中国国内主题 " + str(len(sorted_notes)) + " 条。"
+    )
+    html_doc = """<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>小红书趋势选题日报</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6f9;color:#17212b;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:26px 15px 50px}h1{font-size:25px;margin:0 0 8px}
+.sub,.meta,footer{color:#667085;font-size:12px;line-height:1.6}.card{background:#fff;border:1px solid #e4e8ef;border-radius:13px;padding:17px 18px;margin:12px 0;box-shadow:0 2px 8px rgba(20,40,80,.035)}
+.top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:#667085;font-size:12px}.score{background:#315efb;color:#fff;padding:4px 8px;border-radius:6px}.tag{background:#eef2f8;padding:4px 7px;border-radius:5px}
+h2{font-size:17px;line-height:1.5;margin:12px 0 5px}.meta{margin:0 0 12px}.card>p{font-size:13px;line-height:1.65;margin:7px 0}
+.section{margin:11px 0}.section>b{font-size:12px;color:#475467}.section p,details p{font-size:13px;line-height:1.65;margin:3px 0}
+details{color:#667085;font-size:12px;margin-top:10px}summary{cursor:pointer}.link{margin-top:12px}.link a{color:#315efb;font-weight:700;text-decoration:none}
+footer{margin-top:24px;border-top:1px solid #dfe4ea;padding-top:12px}
+@media(max-width:600px){.wrap{padding:18px 10px 35px}.card{padding:14px}h1{font-size:22px}}
+</style></head><body><main class="wrap">
+<h1>小红书趋势选题日报</h1>
+<p class="sub">最近 7 天 · 9 个内容类别 · 点赞严格大于 5,000 · 按 DeepSeek 海外短视频选题潜力排序</p>
+<div class="sub">""" + html.escape(summary_line) + """</div>
+""" + ("".join(cards) if cards else '<p class="card">本轮没有找到通过点赞门槛及中国国内主题筛选的笔记。</p>') + """
+<footer>说明：关键词搜索不是全站爬取。搜索结果和互动数据来自 TikHub；AI 只分析笔记标题、正文描述和元数据，没有观看图片/视频或读取评论正文。互动数为采集时累计值，不代表最近一周的增长量。<br>
+""" + html.escape(str(summary.get("captured_at_utc", ""))) + """ UTC</footer></main></body></html>"""
+    html_path.write_text(html_doc, encoding="utf-8")
+    return [str(json_path), str(csv_path), str(html_path)]
