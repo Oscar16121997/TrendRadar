@@ -8,10 +8,12 @@ Bot 4 (`douyin_daily_viral`) is deliberately excluded from the daily schedule. I
 
 ## 1. Healthchecks.io
 
+The current repository scheduler is UTC 13:34 daily. Configure Healthchecks to expect one ping per day at UTC 13:34.
+
 Create one Cron check:
 - Name: `TrendRadar daily bots 2+3`
-- Schedule: `17 14 * * *`
-- Time zone: `Europe/Paris`
+- Schedule: `34 13 * * *`
+- Time zone: `UTC`
 - Grace period: 90 minutes
 
 Copy the check's **Ping URL**. In GitHub, open:
@@ -25,10 +27,12 @@ The workflow sends a success ping only after both bot jobs complete successfully
 
 ## 2. cron-job.org
 
+Use UTC scheduling to match the current GitHub cron expression.
+
 Create a daily job with these settings:
 - Name: `TrendRadar - bots 2 and 3`
-- Time zone: `Europe/Paris`
-- Time: every day at 14:17
+- Time zone: `UTC`
+- Time: every day at 13:34 UTC (14:34 Paris winter time)
 - Request URL: `https://api.github.com/repos/Oscar16121997/TrendRadar/actions/workflows/crawler.yml/dispatches`
 - Method: `POST`
 
@@ -55,7 +59,7 @@ A successful GitHub workflow-dispatch API request returns HTTP `204 No Content`.
 
 ## 3. Prevent duplicate daily runs
 
-The repository currently retains its native GitHub schedule as a fallback. **Do not enable the cron-job.org job at 14:17 while the native schedule is still enabled**, or both triggers can start the same bots and duplicate API usage and emails.
+The repository currently retains its native GitHub schedule at 13:34 UTC as a fallback. **Do not enable the cron-job.org job at 13:34 UTC while the native schedule is still enabled**, or both triggers can start the same bots and duplicate API usage and emails.
 
 After cron-job.org is configured and its first manual test returns HTTP 204 and starts the two bot jobs, remove the native `schedule:` trigger from `.github/workflows/crawler.yml`. Keep the `workflow_dispatch:` trigger. This leaves cron-job.org as the sole daily starter, while Healthchecks.io independently alerts if the daily completion ping is missing.
 
