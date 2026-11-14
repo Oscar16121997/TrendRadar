@@ -144,6 +144,13 @@ def request_page(session, api_key, keyword, page, search_id="", search_session_i
         payload = response.json()
     except ValueError as exc:
         raise RuntimeError("TikHub returned a non-JSON response") from exc
+    if response.status_code in (401, 403):
+        raise PermissionError(
+            f"TikHub HTTP {response.status_code}: API Token 无权调用小红书 App V2 搜索接口。"
+            "请到 https://user.tikhub.io/dashboard/api 编辑当前 API Token，"
+            "授权 Xiaohongshu App V2 / search_notes 接口后再运行。"
+            f"原始响应：{str(payload)[:350]}"
+        )
     if response.status_code != 200:
         raise RuntimeError(f"TikHub HTTP {response.status_code}: {str(payload)[:350]}")
     code = payload.get("code") if isinstance(payload, dict) else None
@@ -483,6 +490,9 @@ def main():
                     if has_more is None and not search_id and not search_session_id:
                         break
                     time.sleep(REQUEST_DELAY_SECONDS)
+                except PermissionError as exc:
+                    print(f"❌ TikHub 权限错误，停止本轮采集，避免重复发送失败请求：{exc}", file=sys.stderr)
+                    raise
                 except Exception as exc:
                     category_errors.setdefault(category, []).append(
                         {"keyword": keyword, "page": page_no, "error": str(exc)}
