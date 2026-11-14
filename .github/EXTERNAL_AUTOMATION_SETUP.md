@@ -55,7 +55,7 @@ Request body:
 
 Create a GitHub fine-grained personal access token limited to repository `Oscar16121997/TrendRadar`, with **Actions: Read and write** permission. Store it only in cron-job.org's Authorization header. Do not put the token in this repository, in source code, or in chat.
 
-A successful GitHub workflow-dispatch API request returns HTTP `204 No Content`. In cron-job.org, treat 2xx as success and enable its own failure notification if desired.
+A successful GitHub workflow-dispatch API request returns HTTP `200 OK` with a run ID and URL. In cron-job.org, treat 2xx as success and enable its own failure notification if desired.
 
 ## 3. Prevent duplicate daily runs
 
