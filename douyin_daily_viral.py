@@ -105,7 +105,7 @@ def analyze_douyin_videos_with_deepseek(videos):
             "discussion_score（讨论、共鸣或评论空间）。"
             "不允许把点赞量直接等同于内容质量；分数衡量的是内容作为海外短视频选题的潜力。"
             "地域过滤规则：只保留核心主题属于中国国内的趋势。topic_region 必须是中国国内、国外、不明确之一。核心事件/人物/潮流发生在中国国内，或主题本身是中国社会、人物、娱乐、网红、网络文化，选中国国内；核心主题发生在中国以外任何国家或地区（包括韩国、日本、美国、欧洲及其他地区），包括当地新闻、社会事件、外国明星/网红/娱乐及海外潮流，选国外；标题信息不足以判断地域，选不明确。只是顺带提及外国或作比较，而主体仍是中国内容的，选中国国内。最终仅保留 topic_region=中国国内，国外和不明确均排除。不要因单个国家关键词误删。"
-            "政治宣传判断：political_promotion 必须为“是”“否”“不确定”之一。只有以政治人物/政党/政府机构形象塑造、政治口号或意识形态动员、政治功绩宣传、政治宣传片或政治活动号召为主要目的时才判“是”；客观新闻报道、政策解读、民生服务、普通社会事件、历史文化知识，不因出现政府或政策字样就自动判“是”。证据不足时判“不确定”。日报只保留“否”，“是”和“不确定”均排除。"
+            "政治相关内容过滤：political_related 必须为“是”“否”“不确定”之一。只要视频核心主题涉及政治人物/政党/党务/政府领导层/政治机构/党政会议或政治讲话、选举或政治人事、政治制度或意识形态、政治宣传和动员、政府决策/政策/法律法规/监管议题、公共治理争议、外交关系/地缘政治/战争军事/主权争端、政治运动或抗议等，均判“是”。普通社会新闻、事故灾害、犯罪案件、消费纠纷、商业科技、教育医疗个案、娱乐体育、传统文化和日常生活，不因出现政府部门或公共机构名称就自动判为政治；只有核心讨论是政治决策、政策或治理争议时才判“是”。纯办事指南和日常公共服务通知不算政治。标题/描述不足以排除政治属性时判“不确定”。日报只保留“否”，“是”和“不确定”均排除。"
             "subject_explainer 用简体中文写1句，控制在20至40个汉字，必须直接说清人物是谁/做什么，或事件具体发生了什么，或潮流是什么。"
             "只写核心事实，不写背景铺陈、评价、重复标题；人物职业/身份和事件经过只能依据标题/描述明确提供的信息。"
             "资料不足时简短写‘标题未说明具体身份/经过，需核实’，不要猜测，也不要写长段免责声明。"
@@ -117,7 +117,7 @@ def analyze_douyin_videos_with_deepseek(videos):
             "{\"items\":[{\"id\":0,\"story_score\":0,\"visual_potential_score\":0,"
             "\"global_appeal_score\":0,\"originality_score\":0,\"discussion_score\":0,"
             "\"subject_explainer\":\"\",\"why_attention\":\"\",\"reason\":\"\","
-            "\"english_hook\":\"\",\"content_angle\":\"\",\"caveat\":\"\",\"topic_region\":\"不明确\",\"confidence\":\"low\",\"political_promotion\":\"不确定\"}]}"
+            "\"english_hook\":\"\",\"content_angle\":\"\",\"caveat\":\"\",\"topic_region\":\"不明确\",\"confidence\":\"low\",\"political_related\":\"不确定\"}]}"
         )
         user_prompt = (
             "请分析以下抖音视频元数据。请特别考虑英语受众是否能快速理解、"
@@ -181,8 +181,8 @@ def analyze_douyin_videos_with_deepseek(videos):
                 video["topic_region"] = region if region in ("中国国内", "国外", "不明确") else "不明确"
                 confidence = str(ai.get("confidence", "low")).lower()
                 video["ai_confidence"] = confidence if confidence in ("high", "medium", "low") else "low"
-                political_status = str(ai.get("political_promotion", "不确定")).strip()
-                video["political_promotion"] = political_status if political_status in ("是", "否", "不确定") else "不确定"
+                political_status = str(ai.get("political_related", "不确定")).strip()
+                video["political_related"] = political_status if political_status in ("是", "否", "不确定") else "不确定"
                 video["ai_analysis_status"] = "completed"
                 video["ai_model"] = DEEPSEEK_MODEL
                 analyzed += 1
@@ -377,7 +377,7 @@ def write_reports(videos, summary):
             "sort": "globally sorted by DeepSeek editorial score; current cumulative likes retained as a separate metric",
             "important_limit": "Keyword-based search, not a full-site crawl. AI uses video title/description and metadata only; it does not watch the video.",
             "ai_analysis": "Editorial potential scoring for English TikTok/Instagram adaptation. Unverified identity or event background must be marked as unknown.",
-            "political_filter": "Only videos classified as not political propaganda are included; propaganda and uncertain classifications are excluded.",
+            "political_filter": "Exclude political figures, parties, political institutions, policies, government decisions, governance disputes, diplomacy, geopolitics, military-political issues, political movements and uncertain classifications; retain ordinary non-political social, consumer, culture and entertainment topics.",
         },
         "videos": sorted_rows,
     }
@@ -389,7 +389,7 @@ def write_reports(videos, summary):
         "global_appeal_score", "originality_score", "discussion_score",
         "ai_confidence", "ai_analysis_status", "likes", "title", "author",
         "publish_time_utc", "video_url", "web_url", "video_id", "search_keyword", "topic_region",
-        "play_count", "comment_count", "share_count", "ai_reason", "ai_caveat", "political_promotion",
+        "play_count", "comment_count", "share_count", "ai_reason", "ai_caveat", "political_related",
         "captured_at_utc",
     ]
     with csv_path.open("w", newline="", encoding="utf-8-sig") as f:
@@ -478,9 +478,9 @@ def write_reports(videos, summary):
     excluded_foreign = int(summary.get("excluded_foreign_topics", 0) or 0)
     excluded_unclear = int(summary.get("excluded_unclear_region", 0) or 0)
     excluded_unclassified = int(summary.get("excluded_unclassified", 0) or 0)
-    excluded_political = int(summary.get("excluded_political_promotion", 0) or 0)
+    excluded_political = int(summary.get("excluded_political_related", 0) or 0)
     excluded_political_unclear = int(summary.get("excluded_political_unclear", 0) or 0)
-    empty_state = '<tr><td style="padding:14px;background:#fff;color:#667085;font-size:13px;">今天没有找到同时满足当日发布、点赞超过10,000且非政治宣传的中国热点。</td></tr>' if not cards else ""
+    empty_state = '<tr><td style="padding:14px;background:#fff;color:#667085;font-size:13px;">今天没有找到同时满足当日发布、点赞超过10,000且非涉及政治的中国热点。</td></tr>' if not cards else ""
     html_doc = (
         '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中国抖音当日高赞热点日报</title></head>'
         '<body style="margin:0;padding:0;background:#f2f4f7;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;color:#17212b;">'
@@ -488,9 +488,9 @@ def write_reports(videos, summary):
         '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:680px;border-collapse:collapse;">'
         '<tr><td style="padding:9px 11px;background:#ffffff;border-bottom:2px solid #1558c0;">'
         '<div style="font-size:18px;font-weight:bold;line-height:1.25;">中国抖音当日高赞热点日报</div>'
-        '<div style="font-size:11px;color:#667085;line-height:1.4;padding-top:3px;">仅当日发布 · 点赞超过10,000 · 排除政治宣传 · 按英语短视频选题潜力排序</div>'
+        '<div style="font-size:11px;color:#667085;line-height:1.4;padding-top:3px;">仅当日发布 · 点赞超过10,000 · 排除政治相关 · 按英语短视频选题潜力排序</div>'
         '</td></tr>'
-        f'<tr><td style="padding:6px 10px;background:#f8fafc;font-size:10px;line-height:1.5;color:#667085;">入选 {total_unique} 条 · 已评分 {scored} 条 · 排除海外 {excluded_foreign} 条 · 地域不明 {excluded_unclear} 条 · 未完成AI {excluded_unclassified} 条 · 排除政治宣传 {excluded_political} 条 · 政治属性不明 {excluded_political_unclear} 条</td></tr>'
+        f'<tr><td style="padding:6px 10px;background:#f8fafc;font-size:10px;line-height:1.5;color:#667085;">入选 {total_unique} 条 · 已评分 {scored} 条 · 排除海外 {excluded_foreign} 条 · 地域不明 {excluded_unclear} 条 · 未完成AI {excluded_unclassified} 条 · 排除政治相关 {excluded_political} 条 · 政治属性不明 {excluded_political_unclear} 条</td></tr>'
         '<tr><td style="padding:4px 10px;background:#eef2f7;font-size:10px;font-weight:bold;color:#475467;">热点列表（按综合分排序）</td></tr>'
         + "".join(cards) + empty_state
         + f'<tr><td style="padding:8px 10px;background:#f8fafc;font-size:10px;line-height:1.45;color:#667085;">评分权重：故事性25% · 海外吸引力25% · 视觉潜力20% · 原创性15% · 讨论空间15%。AI仅依据标题/描述和互动数据分析，未观看视频画面。<br>采集时间（UTC）：{generated_at}</td></tr>'
@@ -643,19 +643,19 @@ def main():
     excluded_foreign = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "国外")
     excluded_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "不明确")
     excluded_unclassified = sum(1 for video in unique_videos if video.get("ai_analysis_status") != "completed")
-    excluded_political = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_promotion") == "是")
-    excluded_political_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_promotion") == "不确定")
-    unique_videos = [video for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "中国国内" and video.get("political_promotion") == "否"]
+    excluded_political = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_related") == "是")
+    excluded_political_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_related") == "不确定")
+    unique_videos = [video for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "中国国内" and video.get("political_related") == "否"]
     by_id = {video["video_id"]: video for video in unique_videos}
     summary["unique_videos_before_region_filter"] = unique_before_region_filter
     summary["excluded_foreign_topics"] = excluded_foreign
     summary["excluded_unclear_region"] = excluded_unclear
     summary["excluded_unclassified"] = excluded_unclassified
-    summary["excluded_political_promotion"] = excluded_political
+    summary["excluded_political_related"] = excluded_political
     summary["excluded_political_unclear"] = excluded_political_unclear
     summary["unique_videos"] = len(unique_videos)
     summary["topic_filter"] = "中国国内；国外/地域不明/未完成AI分类均排除"
-    summary["political_filter"] = "只保留AI判定为非政治宣传的内容；政治宣传及判定不明确均排除"
+    summary["political_filter"] = "只保留AI判定为非政治相关的内容；政治相关及判定不明确均排除"
     summary["likes_filter"] = f"北京时间当天发布且点赞数严格大于 {MIN_LIKES_EXCLUSIVE}"
 
     final_videos = []
