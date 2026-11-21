@@ -480,7 +480,7 @@ def write_reports(videos, summary):
     excluded_unclassified = int(summary.get("excluded_unclassified", 0) or 0)
     excluded_political = int(summary.get("excluded_political_related", 0) or 0)
     excluded_political_unclear = int(summary.get("excluded_political_unclear", 0) or 0)
-    empty_state = '<tr><td style="padding:14px;background:#fff;color:#667085;font-size:13px;">今天没有找到同时满足当日发布、点赞超过10,000且非涉及政治的中国热点。</td></tr>' if not cards else ""
+    empty_state = '<tr><td style="padding:14px;background:#fff;color:#667085;font-size:13px;">今天没有找到同时满足当日发布、点赞超过10,000且不涉及政治的中国热点。</td></tr>' if not cards else ""
     html_doc = (
         '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中国抖音当日高赞热点日报</title></head>'
         '<body style="margin:0;padding:0;background:#f2f4f7;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;color:#17212b;">'
