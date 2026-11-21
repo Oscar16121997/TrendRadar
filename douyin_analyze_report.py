@@ -65,6 +65,18 @@ def main():
     )
 
     ai_summary = analyze_douyin_videos_with_deepseek(unique_videos)
+    unique_before_filter = len(unique_videos)
+    excluded_foreign = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "国外")
+    excluded_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("topic_region") == "不明确")
+    excluded_unclassified = sum(1 for video in unique_videos if video.get("ai_analysis_status") != "completed")
+    excluded_political_related = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_related") == "是")
+    excluded_political_unclear = sum(1 for video in unique_videos if video.get("ai_analysis_status") == "completed" and video.get("political_related") == "不确定")
+    unique_videos = [
+        video for video in unique_videos
+        if video.get("ai_analysis_status") == "completed"
+        and video.get("topic_region") == "中国国内"
+        and video.get("political_related") == "否"
+    ]
     unique = {video["video_id"]: video for video in unique_videos}
 
     report_rows = []
@@ -117,6 +129,15 @@ def main():
     summary["analysis_source"] = str(INPUT_FILE)
     summary["tikHub_additional_requests"] = 0
     summary["ai_score_weights"] = AI_SCORE_WEIGHTS
+    summary["unique_videos_before_region_filter"] = unique_before_filter
+    summary["excluded_foreign_topics"] = excluded_foreign
+    summary["excluded_unclear_region"] = excluded_unclear
+    summary["excluded_unclassified"] = excluded_unclassified
+    summary["excluded_political_related"] = excluded_political_related
+    summary["excluded_political_unclear"] = excluded_political_unclear
+    summary["unique_videos"] = len(unique_videos)
+    summary["topic_filter"] = "中国国内；国外/地域不明/未完成AI分类均排除"
+    summary["political_filter"] = "排除政治相关主题及政治属性不明内容"
 
     paths = write_reports(report_rows, summary)
     print("\nDeepSeek分析完成")
