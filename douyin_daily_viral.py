@@ -2,7 +2,7 @@
 """Daily high-like Douyin trend discovery, derived from the keyword-trend robot.
 
 Collects videos published on the current China calendar day, requires >10,000 likes,
-keeps China-related topics, and excludes political propaganda before report generation.
+keeps China-related topics, and excludes political-related topics plus uncertain classifications before report generation.
 """
 import csv
 import html
