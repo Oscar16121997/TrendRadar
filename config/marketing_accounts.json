@@ -9,66 +9,22 @@
   "max_pages_per_account": 3,
   "page_size": 20,
   "accounts": [
-    {
-      "name": "大厂退役狗妹",
-      "identifier": "dcgmccc"
-    },
-    {
-      "name": "娱乐薯片崽",
-      "identifier": "LiGe91666"
-    },
-    {
-      "name": "挖了个趣",
-      "identifier": "1729497960"
-    },
-    {
-      "name": "摸娱背过",
-      "identifier": "MYbeiguo"
-    },
-    {
-      "name": "蘑菇咕叽叽",
-      "identifier": "qinghexianpe"
-    },
-    {
-      "name": "娱乐课代表孙小寒",
-      "identifier": "yulekedaibiao"
-    },
-    {
-      "name": "三言两娱",
-      "identifier": "189205417"
-    },
-    {
-      "name": "冰娱上上签",
-      "identifier": "Yss6999"
-    },
-    {
-      "name": "爆爆大王",
-      "identifier": "TQQWISH"
-    },
-    {
-      "name": "萤火虫娱乐",
-      "identifier": "YHCfan"
-    },
-    {
-      "name": "巨星火火",
-      "identifier": "huohuoyyds888"
-    },
-    {
-      "name": "冲浪鳕鱼",
-      "identifier": "61241962343"
-    },
-    {
-      "name": "瞎通不设计了",
-      "identifier": "45344828599"
-    },
-    {
-      "name": "娱是乎",
-      "identifier": "yushihu888"
-    },
-    {
-      "name": "我是王炸姐",
-      "identifier": "wzi685522"
-    }
+    {"name": "大厂退役狗妹", "identifier": "dcgmccc"},
+    {"name": "娱乐薯片崽", "identifier": "LiGe91666"},
+    {"name": "挖了个趣", "identifier": "1729497960"},
+    {"name": "摸娱背过", "identifier": "MYbeiguo"},
+    {"name": "蘑菇咕叽叽", "identifier": "qinghexianpe"},
+    {"name": "娱乐课代表孙小寒", "identifier": "yulekedaibiao"},
+    {"name": "三言两娱", "identifier": "189205417"},
+    {"name": "冰娱上上签", "identifier": "Yss6999"},
+    {"name": "爆爆大王", "identifier": "TQQWISH"},
+    {"name": "萤火虫娱乐", "identifier": "YHCfan"},
+    {"name": "巨星火火", "identifier": "huohuoyyds888"},
+    {"name": "冲浪鳕鱼", "identifier": "61241962343"},
+    {"name": "瞎通不设计了", "identifier": "45344828599"},
+    {"name": "娱是乎", "identifier": "yushihu888"},
+    {"name": "我是王炸姐", "identifier": "wzi685522"},
+    {"name": "八卦茶茶酱", "identifier": "ppxsm888"}
   ],
   "categories": [
     "时事",
